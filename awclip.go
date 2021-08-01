@@ -40,3 +40,19 @@ func GetLocationMetaData(contentId *string) *string {
 	location := tmpdir + string(os.PathSeparator) + *contentId + "-db.json"
 	return &location
 }
+
+
+// CleanUp
+// if args contains "--profile" and "profilename", put them at the end
+// so optimizer can regognize it
+func CleanUp(args []string) []string{
+    for i, v := range args{
+        if v == "--profile" {
+            args = append(args, "--profile")
+            args = append(args, args[i+1])
+            args = append(args[:i], args[i+2:]... )
+            break
+        }
+	}
+    return args
+}
