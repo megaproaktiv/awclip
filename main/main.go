@@ -18,11 +18,11 @@ func main() {
 
     prg := "aws"
 	
-	commandLine := "aws"
-	command := os.Args[2]
-
-	os.Args = awclip.CleanUp(os.Args)
 	seperator := "_"
+	commandLine := "aws"
+	command := os.Args[1]
+	commandLine += seperator+command
+	os.Args = awclip.CleanUp(os.Args)
 	for i:= 1; i < len(os.Args)-1 ; i++{
 		commandLine += seperator+os.Args[1+i]
 	}

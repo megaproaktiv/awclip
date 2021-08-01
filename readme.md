@@ -108,4 +108,5 @@ if you copy awclip into the same directory.
 - reads command line
 - calls aws with (python) aws cli
 - writes metadata
+- does not cache "generate-credential-report"
 

@@ -1,0 +1,142 @@
+{
+    "Reservations": [
+        {
+            "Groups": [],
+            "Instances": [
+                {
+                    "AmiLaunchIndex": 0,
+                    "ImageId": "ami-03c10046b8071fff5",
+                    "InstanceId": "i-038834a1e9d61882a",
+                    "InstanceType": "t4g.nano",
+                    "KeyName": "gg-ffm",
+                    "LaunchTime": "2021-08-01T19:09:32.000Z",
+                    "Monitoring": {
+                        "State": "disabled"
+                    },
+                    "Placement": {
+                        "AvailabilityZone": "eu-central-1b",
+                        "GroupName": "",
+                        "Tenancy": "default"
+                    },
+                    "PrivateDnsName": "ip-172-31-39-21.eu-central-1.compute.internal",
+                    "PrivateIpAddress": "172.31.39.21",
+                    "ProductCodes": [],
+                    "PublicDnsName": "ec2-18-184-4-221.eu-central-1.compute.amazonaws.com",
+                    "PublicIpAddress": "18.184.4.221",
+                    "State": {
+                        "Code": 16,
+                        "Name": "running"
+                    },
+                    "StateTransitionReason": "",
+                    "SubnetId": "subnet-0d2cff8c65aaf2f2f",
+                    "VpcId": "vpc-05f8e698b26ee6b20",
+                    "Architecture": "arm64",
+                    "BlockDeviceMappings": [
+                        {
+                            "DeviceName": "/dev/xvda",
+                            "Ebs": {
+                                "AttachTime": "2021-08-01T19:09:33.000Z",
+                                "DeleteOnTermination": true,
+                                "Status": "attached",
+                                "VolumeId": "vol-08c85b80d7537f048"
+                            }
+                        }
+                    ],
+                    "ClientToken": "",
+                    "EbsOptimized": true,
+                    "EnaSupport": true,
+                    "Hypervisor": "xen",
+                    "IamInstanceProfile": {
+                        "Arn": "arn:aws:iam::555544448888:instance-profile/DemoEC2RoleforSSM",
+                        "Id": "AIPAILSWX5MEFQ3H7MTE2"
+                    },
+                    "NetworkInterfaces": [
+                        {
+                            "Association": {
+                                "IpOwnerId": "amazon",
+                                "PublicDnsName": "ec2-18-184-4-221.eu-central-1.compute.amazonaws.com",
+                                "PublicIp": "18.184.4.221"
+                            },
+                            "Attachment": {
+                                "AttachTime": "2021-08-01T19:09:32.000Z",
+                                "AttachmentId": "eni-attach-011991a34ced6c331",
+                                "DeleteOnTermination": true,
+                                "DeviceIndex": 0,
+                                "Status": "attached",
+                                "NetworkCardIndex": 0
+                            },
+                            "Description": "",
+                            "Groups": [
+                                {
+                                    "GroupName": "sshopenmobile",
+                                    "GroupId": "sg-0e407fa43638b8798"
+                                }
+                            ],
+                            "Ipv6Addresses": [],
+                            "MacAddress": "06:cc:aa:0b:1e:f4",
+                            "NetworkInterfaceId": "eni-09e2913a4e9cc09cd",
+                            "OwnerId": "555544448888",
+                            "PrivateDnsName": "ip-172-31-39-21.eu-central-1.compute.internal",
+                            "PrivateIpAddress": "172.31.39.21",
+                            "PrivateIpAddresses": [
+                                {
+                                    "Association": {
+                                        "IpOwnerId": "amazon",
+                                        "PublicDnsName": "ec2-18-184-4-221.eu-central-1.compute.amazonaws.com",
+                                        "PublicIp": "18.184.4.221"
+                                    },
+                                    "Primary": true,
+                                    "PrivateDnsName": "ip-172-31-39-21.eu-central-1.compute.internal",
+                                    "PrivateIpAddress": "172.31.39.21"
+                                }
+                            ],
+                            "SourceDestCheck": true,
+                            "Status": "in-use",
+                            "SubnetId": "subnet-0d2cff8c65aaf2f2f",
+                            "VpcId": "vpc-05f8e698b26ee6b20",
+                            "InterfaceType": "interface"
+                        }
+                    ],
+                    "RootDeviceName": "/dev/xvda",
+                    "RootDeviceType": "ebs",
+                    "SecurityGroups": [
+                        {
+                            "GroupName": "sshopenmobile",
+                            "GroupId": "sg-0e407fa43638b8798"
+                        }
+                    ],
+                    "SourceDestCheck": true,
+                    "Tags": [
+                        {
+                            "Key": "Name",
+                            "Value": "demo"
+                        }
+                    ],
+                    "VirtualizationType": "hvm",
+                    "CpuOptions": {
+                        "CoreCount": 2,
+                        "ThreadsPerCore": 1
+                    },
+                    "CapacityReservationSpecification": {
+                        "CapacityReservationPreference": "open"
+                    },
+                    "HibernationOptions": {
+                        "Configured": false
+                    },
+                    "MetadataOptions": {
+                        "State": "applied",
+                        "HttpTokens": "optional",
+                        "HttpPutResponseHopLimit": 1,
+                        "HttpEndpoint": "enabled"
+                    },
+                    "EnclaveOptions": {
+                        "Enabled": false
+                    },
+                    "BootMode": "uefi"
+                }
+            ],
+            "OwnerId": "555544448888",
+            "ReservationId": "r-03b03e60bb56c7dd5"
+        }
+    ]
+}

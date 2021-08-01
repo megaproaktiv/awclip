@@ -11,11 +11,16 @@ import (
 // CacheEntry
 // Cmd executable command line e.g. aws ec2 describe instances
 type CacheEntry struct {
+	Id           *string
 	Cmd          *string
 	Created      time.Time
 	LastAccessed time.Time
 	AccessCounter int
-	Id           *string
+	Action *string
+	Output *string
+	Region *string
+	Profile *string
+	Query *string
 }
 
 func WriteMetadata(md *CacheEntry) error {
@@ -95,4 +100,22 @@ func UpdateMetaData(md *CacheEntry) error {
 	}
 
 	return nil
+}
+
+func (item *CacheEntry) ArgumentsToCachedEntry(args []string, )  {
+	*item.Action = args[0]
+	for i,arg := range args{
+		if arg == "--query" {
+			*item.Query = args[i+1]
+		}
+		if arg == "--region" {
+			*item.Region = args[i+1]
+		}
+		if arg == "--profile" {
+			*item.Profile = args[i+1]
+		}
+		if arg == "--output" {
+			*item.Output = args[i+1]
+		}
+	}
 }

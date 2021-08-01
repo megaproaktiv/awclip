@@ -15,5 +15,6 @@ tasks:
     cmds:
       - go build -o dist/awclip main/main.go
       - cp dist/awclip ~/Documents/eprojects/prowler  
-
-# silent: true
+  test:
+    cmds:
+      - go test ./... -v
