@@ -24,8 +24,8 @@ func TestEc2DescribeInstancesProxy(t *testing.T) {
 				t.Error("Cant read input testdata")
 				t.Error(err)
 			}
-			json.Unmarshal(data, &output);
-			return &output,nil
+			json.Unmarshal(data, &output)
+			return &output, nil
 		},
 	}
 
@@ -33,12 +33,12 @@ func TestEc2DescribeInstancesProxy(t *testing.T) {
 	// and then make assertions.
 	os.Setenv("AUTO_INIT", "false")
 	config := &awclip.CacheEntry{
-		Action:        aws.String("describe-instances"),
-		Output:        aws.String("text"),
-		Region:        aws.String("eu-central-1"),
-		Profile:       aws.String("dummy"),
-		Query:         aws.String("Reservations[*].Instances[*].[InstanceId]"),
+		Action:  aws.String("describe-instances"),
+		Output:  aws.String("text"),
+		Region:  aws.String("eu-central-1"),
+		Profile: aws.String("dummy"),
+		Query:   aws.String("Reservations[*].Instances[*].[InstanceId]"),
 	}
-	content := services.Ec2DescribeInstancesProxy(config,mockedEc2Interface)
+	content := services.Ec2DescribeInstancesProxy(config, mockedEc2Interface)
 	assert.Equal(t, "i-038834a1e9d61882a", *content)
 }

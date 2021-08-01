@@ -9,14 +9,12 @@ import (
 	"github.com/megaproaktiv/awclip"
 )
 
-
 //go:generate moq -out ec2_moq_test.go . Ec2Interface
 type Ec2Interface interface {
-    DescribeInstances(ctx context.Context,
+	DescribeInstances(ctx context.Context,
 		params *ec2.DescribeInstancesInput,
-		optFns ...func(*ec2.Options)) (*ec2.DescribeInstancesOutput,error)   
+		optFns ...func(*ec2.Options)) (*ec2.DescribeInstancesOutput, error)
 }
-
 
 // func init() {
 // 	autoinit := Autoinit()
@@ -29,11 +27,11 @@ type Ec2Interface interface {
 // 	}
 // }
 
-func Ec2DescribeInstancesProxy( config *awclip.CacheEntry, client Ec2Interface) *string{
-	
-	resp,err := client.DescribeInstances(context.TODO(), nil,func(o *ec2.Options) {
+func Ec2DescribeInstancesProxy(config *awclip.CacheEntry, client Ec2Interface) *string {
+
+	resp, err := client.DescribeInstances(context.TODO(), nil, func(o *ec2.Options) {
 		o.Region = *config.Region
-	} )
+	})
 
 	if err != nil {
 		fmt.Println("Cant connect ec2")
@@ -41,7 +39,7 @@ func Ec2DescribeInstancesProxy( config *awclip.CacheEntry, client Ec2Interface) 
 	}
 	content := ""
 	if *config.Query == "Reservations[*].Instances[*].[InstanceId]" {
-		for _,v := range resp.Reservations {
+		for _, v := range resp.Reservations {
 			for _, k := range v.Instances {
 				content = content + *k.InstanceId
 			}
@@ -49,4 +47,3 @@ func Ec2DescribeInstancesProxy( config *awclip.CacheEntry, client Ec2Interface) 
 	}
 	return &content
 }
-

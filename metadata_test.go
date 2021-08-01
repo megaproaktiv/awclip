@@ -1,21 +1,22 @@
-package awclip
+package awclip_test
 
 import (
 	"testing"
 	"gotest.tools/assert"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/megaproaktiv/awclip"
 )
 
 func TestArgumentsToCachedEntry(t *testing.T) {
 	type args struct {
 		args []string
-		item *CacheEntry
+		item *awclip.CacheEntry
 	}
 	tests := []struct {
 		name string
 		args args
-		want *CacheEntry
+		want *awclip.Parameters
 	}{
 		{
 			name: "recognise ec2 DescribeInstances",
@@ -31,8 +32,8 @@ func TestArgumentsToCachedEntry(t *testing.T) {
 					"--profile",
 					"myprofile",
 				},
-				item: &CacheEntry{
-					Id:            aws.String("abc"),
+				item: &awclip.CacheEntry{
+					Parameters: &awclip.Parameters{
 					Action:        new(string),
 					Output:        new(string),
 					Region:        new(string),
@@ -40,8 +41,8 @@ func TestArgumentsToCachedEntry(t *testing.T) {
 					Query:         new(string),
 				},
 			},
-			want: &CacheEntry{
-				Id:            aws.String("abc"),
+			},
+			want: &awclip.Parameters{
 				Action:        aws.String("describe-instances"),
 				Output:        aws.String("text"),
 				Region:        aws.String("eu-central-1"),
@@ -55,11 +56,8 @@ func TestArgumentsToCachedEntry(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			tt.args.item.ArgumentsToCachedEntry(tt.args.args)
-			assert.Equal(t,*tt.args.item.Action, *tt.want.Action)
-			assert.Equal(t,*tt.args.item.Output, *tt.want.Output)
-			assert.Equal(t,*tt.args.item.Region, *tt.want.Region)
-			assert.Equal(t,*tt.args.item.Profile, *tt.want.Profile)
-			assert.Equal(t,*tt.args.item.Query, *tt.want.Query)
+			assert.DeepEqual(t,*tt.args.item.Parameters, *tt.want)
+			
 		})
 	}
 }
