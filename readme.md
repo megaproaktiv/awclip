@@ -5,7 +5,7 @@ Local caching of aws cli commands
 - Store command results in `.awsclip` as md5hash of parameters
 - Store metadata as hash-md.json
 
-User it as aws cli alias:
+Use it as aws cli alias:
 
 If awclip binary is in /usr/local/bin:
 
@@ -28,6 +28,29 @@ aws iam list-roles > /dev/null
 
 Time varies from 1..2 seconds
 
+- copy awclip executable to your local filesystem
+    - see https://github.com/megaproaktiv/awclip/tags
+    - e.g. to `/usr/local/bin/awclip`
+
+- create an alias
+    ```bash
+    alias aws=`/usr/local/bin/awclip`
+    ```
+    
+
+- create a local `.awclip` directory
+
+    ```bash
+    mkdir .awclip
+    ```
+    
+
+- or clean existing directory
+
+    ```bash
+    rm .awclip/*
+    ```
+
 1st time with awclip:
 
 ```bash
@@ -43,6 +66,32 @@ time aws iam list-roles >/dev/null
 /Users/silberkopf/letsbuild/awclip/dist/awclip iam list-roles > /dev/null 
  0,00s user 0,00s system 40% cpu 0,014 total
 ```
+
+## Working with prowler
+
+Change `include/awscli_detector`
+
+Change
+
+```bash
+if [ ! -z $(which aws) ]; then
+  AWSCLI=$(which aws)
+elif [ ! -z $(type -p aws) ]; then
+  AWSCLI=$(type -p aws)
+else
+  echo -e "\n$RED ERROR!$NORMAL AWS-CLI (aws command) not found. Make sure it is installed correctly and in your \$PATH\n"
+  EXITCODE=1
+  exit $EXITCODE
+fi
+```
+
+to
+
+```bash
+AWSCLI=./awclip
+```
+
+if you copy awclip into the same directory.
 
 ## Todo
 
