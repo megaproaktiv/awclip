@@ -22,6 +22,7 @@ func TestArgumentsToCachedEntry(t *testing.T) {
 			name: "recognise ec2 DescribeInstances",
 			args: args{
 				args: []string{
+					"dist/awclip",
 					"describe-instances",
 					"--query",
 					"Reservations[*].Instances[*].[InstanceId]",
@@ -33,7 +34,7 @@ func TestArgumentsToCachedEntry(t *testing.T) {
 					"myprofile",
 				},
 				item: &awclip.CacheEntry{
-					Parameters: &awclip.Parameters{
+					Parameters: awclip.Parameters{
 					Action:        new(string),
 					Output:        new(string),
 					Region:        new(string),
@@ -56,7 +57,7 @@ func TestArgumentsToCachedEntry(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			tt.args.item.ArgumentsToCachedEntry(tt.args.args)
-			assert.DeepEqual(t,*tt.args.item.Parameters, *tt.want)
+			assert.DeepEqual(t,tt.args.item.Parameters, *tt.want)
 			
 		})
 	}

@@ -18,6 +18,7 @@ func TestCleanUp(t *testing.T) {
 			name: "GetCallerIdentity",
 			args: args{
 				args: []string{
+					"dist/awclip",
 					"get-caller-identity",
 					"--profile",
 					"myprofile",
@@ -26,6 +27,7 @@ func TestCleanUp(t *testing.T) {
 				},
 			},
 			want: []string{
+				"dist/awclip",
 				"get-caller-identity",
 				"--region",
 				"eu-central-1",

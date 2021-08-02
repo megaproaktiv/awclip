@@ -2,6 +2,7 @@ package awclip
 
 import (
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"log"
 	"os"
@@ -24,7 +25,7 @@ type CacheEntry struct {
 	Created      time.Time
 	LastAccessed time.Time
 	AccessCounter int
-	Parameters *Parameters
+	Parameters Parameters
 }
 
 func WriteMetadata(md *CacheEntry) error {
@@ -107,7 +108,9 @@ func UpdateMetaData(md *CacheEntry) error {
 }
 
 func (item *CacheEntry) ArgumentsToCachedEntry(args []string, )  {
-	*item.Parameters.Action = args[0]
+	action := args[1]
+	fmt.Println("Action:",action)
+	*item.Parameters.Action = action
 	for i,arg := range args{
 		if arg == "--query" {
 			*item.Parameters.Query = args[i+1]
@@ -122,4 +125,15 @@ func (item *CacheEntry) ArgumentsToCachedEntry(args []string, )  {
 			*item.Parameters.Output = args[i+1]
 		}
 	}
+}
+
+func (a *Parameters) Equal(b *Parameters) bool {
+	if *a.Action == *b.Action && 
+		*a.Output == *b.Output && 
+		*a.Region == *b.Region && 
+		*a.Profile == *b.Profile && 
+		*a.Query == *b.Query {
+			return true
+		}  
+	return false	
 }

@@ -33,11 +33,13 @@ func TestEc2DescribeInstancesProxy(t *testing.T) {
 	// and then make assertions.
 	os.Setenv("AUTO_INIT", "false")
 	config := &awclip.CacheEntry{
-		Action:  aws.String("describe-instances"),
-		Output:  aws.String("text"),
-		Region:  aws.String("eu-central-1"),
-		Profile: aws.String("dummy"),
-		Query:   aws.String("Reservations[*].Instances[*].[InstanceId]"),
+		Parameters: awclip.Parameters{
+			Action:  aws.String("describe-instances"),
+			Output:  aws.String("text"),
+			Region:  aws.String("eu-central-1"),
+			Profile: aws.String("dummy"),
+			Query:   aws.String("Reservations[*].Instances[*].[InstanceId]"),
+		},
 	}
 	content := services.Ec2DescribeInstancesProxy(config, mockedEc2Interface)
 	assert.Equal(t, "i-038834a1e9d61882a", *content)

@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"github.com/aws/aws-sdk-go-v2/aws"
 
 	"github.com/aws/aws-sdk-go-v2/service/ec2"
 	"github.com/megaproaktiv/awclip"
@@ -27,10 +28,18 @@ type Ec2Interface interface {
 // 	}
 // }
 
+var Ec2DescribeInstancesParameter = &awclip.Parameters{
+	Action:  aws.String("describe-instances"),
+	Output:  aws.String("text"),
+	Region:  aws.String("eu-central-1"),
+	Profile: aws.String("dummy"),
+	Query:   aws.String("Reservations[*].Instances[*].[InstanceId]"),
+}
+
 func Ec2DescribeInstancesProxy(config *awclip.CacheEntry, client Ec2Interface) *string {
 
 	resp, err := client.DescribeInstances(context.TODO(), nil, func(o *ec2.Options) {
-		o.Region = *config.Region
+		o.Region = *config.Parameters.Region
 	})
 
 	if err != nil {
@@ -38,7 +47,7 @@ func Ec2DescribeInstancesProxy(config *awclip.CacheEntry, client Ec2Interface) *
 		log.Fatal(err)
 	}
 	content := ""
-	if *config.Query == "Reservations[*].Instances[*].[InstanceId]" {
+	if *config.Parameters.Query == "Reservations[*].Instances[*].[InstanceId]" {
 		for _, v := range resp.Reservations {
 			for _, k := range v.Instances {
 				content = content + *k.InstanceId
@@ -47,3 +56,4 @@ func Ec2DescribeInstancesProxy(config *awclip.CacheEntry, client Ec2Interface) *
 	}
 	return &content
 }
+
