@@ -2,45 +2,58 @@ package awclip
 
 import (
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"log"
 	"os"
 	"time"
 )
 
+type ApiCallProviderName string
+
+const (
+	ApiCallProviderNameAws ApiCallProviderName = "aws cli python"
+	ApiCallProviderNameGo ApiCallProviderName = "go sdk v2"
+)
+
+type ApiCallProvider struct {
+	// Open for extensions like provided calls
+	Name ApiCallProviderName
+}
+
 type Parameters struct {
-	Action *string
-	Output *string
-	Region *string
+	Service *string
+	Action  *string
+	Output  *string
+	Region  *string
 	Profile *string
-	Query *string
+	Query   *string
 }
 
 // CacheEntry
 // Cmd executable command line e.g. aws ec2 describe instances
 type CacheEntry struct {
-	Id           *string
-	Cmd          *string
-	Created      time.Time
-	LastAccessed time.Time
+	Id            *string
+	Cmd           *string
+	Created       time.Time
+	LastAccessed  time.Time
 	AccessCounter int
-	Parameters Parameters
+	Parameters    Parameters
+	Provider string
 }
 
 func WriteMetadata(md *CacheEntry) error {
 	location := GetLocationMetaData(md.Id)
-	
-	content,err := json.Marshal(md)
+
+	content, err := json.Marshal(md)
 	if err != nil {
 		log.Fatal(err)
 	}
 	var fileoptions int
 	if CacheHit(md.Id) {
 		// Update file
-		fileoptions = os.O_RDWR|os.O_CREATE|os.O_TRUNC
-	}else{
-		fileoptions = os.O_RDWR|os.O_CREATE
+		fileoptions = os.O_RDWR | os.O_CREATE | os.O_TRUNC
+	} else {
+		fileoptions = os.O_RDWR | os.O_CREATE
 	}
 	file, err := os.OpenFile(*location, fileoptions, 0755)
 	if err != nil {
@@ -57,10 +70,7 @@ func WriteMetadata(md *CacheEntry) error {
 	return nil
 }
 
-
 func ReadMetaData(id *string) (*CacheEntry, error) {
-	
-	
 	file, err := os.Open(*GetLocationMetaData(id))
 	if err != nil {
 		log.Panicf("failed open file: %s", err)
@@ -79,18 +89,17 @@ func ReadMetaData(id *string) (*CacheEntry, error) {
 		return nil, err
 	}
 
-	return  &metadata, nil
+	return &metadata, nil
 }
-
 
 func UpdateMetaData(md *CacheEntry) error {
 	location := GetLocationMetaData(md.Id)
 	md.AccessCounter += 1
-	content,err := json.Marshal(md)
+	content, err := json.Marshal(md)
 	if err != nil {
 		log.Fatal(err)
 	}
-	var fileoptions = os.O_RDWR|os.O_CREATE|os.O_TRUNC
+	var fileoptions = os.O_RDWR | os.O_CREATE | os.O_TRUNC
 
 	file, err := os.OpenFile(*location, fileoptions, 0755)
 	if err != nil {
@@ -107,11 +116,12 @@ func UpdateMetaData(md *CacheEntry) error {
 	return nil
 }
 
-func (item *CacheEntry) ArgumentsToCachedEntry(args []string, )  {
-	action := args[1]
-	fmt.Println("Action:",action)
+func (item *CacheEntry) ArgumentsToCachedEntry(args []string) {
+	service := args[1]
+	*item.Parameters.Service = service
+	action := args[2]
 	*item.Parameters.Action = action
-	for i,arg := range args{
+	for i, arg := range args {
 		if arg == "--query" {
 			*item.Parameters.Query = args[i+1]
 		}
@@ -127,13 +137,12 @@ func (item *CacheEntry) ArgumentsToCachedEntry(args []string, )  {
 	}
 }
 
-func (a *Parameters) Equal(b *Parameters) bool {
-	if *a.Action == *b.Action && 
-		*a.Output == *b.Output && 
-		*a.Region == *b.Region && 
-		*a.Profile == *b.Profile && 
+func (a *Parameters) AlmostEqual(b *Parameters) bool {
+	if 	*a.Service == *b.Service &&
+		*a.Action == *b.Action &&
+		*a.Output == *b.Output &&
 		*a.Query == *b.Query {
-			return true
-		}  
-	return false	
+		return true
+	}
+	return false
 }

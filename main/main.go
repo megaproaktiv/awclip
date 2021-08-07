@@ -12,73 +12,113 @@ import (
 
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/ec2"
+	"github.com/aws/aws-sdk-go-v2/service/sts"
 
 	"github.com/megaproaktiv/awclip"
 	"github.com/megaproaktiv/awclip/services"
 )
+const debug = false
 
 func main() {
 
-    prg := "aws"
-	
+	prg := "aws"
+
 	seperator := "_"
 	commandLine := "aws"
 	command := os.Args[1]
-	commandLine += seperator+command
-	args := awclip.CleanUp(os.Args)
-	for i:= 1; i < len(args)-1 ; i++{
-		commandLine += seperator+args[1+i]
+	
+	if debug {
+		log.Println("Parameters: ", os.Args)
 	}
-	
-	fmt.Println(prg, ":", args, ":", commandLine)
-	
+	args := awclip.ArrangeParameters(os.Args)
+	for i := 1; i < len(args)-1; i++ {
+		commandLine += seperator + args[1+i]
+	}
+
+	if debug {
+		log.Println("CommandLine: ", commandLine)
+	}
 	cmd := exec.Command(prg, args[1:]...)
-	
+
 	hash := md5.Sum([]byte(commandLine))
 	hashstring := hex.EncodeToString(hash[:])
 	id := &hashstring
 	start := time.Now()
 
 	var content *string
-	
+
 	discriminated := awclip.DiscriminatedCommand(&command)
-	if awclip.CacheHit(id) && !discriminated{
+	if awclip.CacheHit(id) && !discriminated {
 		// Hit
 		content, _ = awclip.ReadContent(id)
-		metadata,_ := awclip.ReadMetaData(id)
+		metadata, _ := awclip.ReadMetaData(id)
 		err := awclip.UpdateMetaData(metadata)
 		if err != nil {
 			log.Print(err)
 		}
 	}
 
-	//Miss
-	if !awclip.CacheHit(id) && !discriminated{
-		// fastproxy available
-		testEntry := &awclip.CacheEntry{
-			Parameters:    awclip.Parameters{},
+	//Miss => create entry
+	if awclip.CacheMiss(id) && !discriminated {
+		// fastproxy available?
+		newCacheEntry := &awclip.CacheEntry{
+			Parameters: awclip.Parameters{
+				Service: new(string),
+				Action:  new(string),
+				Output:  new(string),
+				Region:  new(string),
+				Profile: new(string),
+				Query:   new(string),
+			},
+			Provider: "tbd",
 		}
-		testEntry.ArgumentsToCachedEntry(args)
-		testParms := testEntry.Parameters
-		if testParms.Equal( services.Ec2DescribeInstancesParameter) {
-
-			cfg,err := config.LoadDefaultConfig(
+		newCacheEntry.ArgumentsToCachedEntry(args)
+		newParms := newCacheEntry.Parameters
+		if newParms.AlmostEqual(services.Ec2DescribeInstancesParameter) {
+			newCacheEntry.Provider = "go"
+			cfg, err := config.LoadDefaultConfig(
 				context.TODO(),
 				// Specify the shared configuration profile to load.
-				config.WithSharedConfigProfile(*testEntry.Parameters.Profile),
+				config.WithSharedConfigProfile(*newCacheEntry.Parameters.Profile),
 			)
 			if err != nil {
 				panic("configuration error, " + err.Error())
 			}
 			client := ec2.NewFromConfig(cfg)
-			content = services.Ec2DescribeInstancesProxy(testEntry, client)
-
-		}else {
+			content = services.Ec2DescribeInstancesProxy(newCacheEntry, client) 
+		} else if newParms.AlmostEqual(services.StsGetCallerIdentityParameter) {
+			newCacheEntry.Provider = "go"
+			cfg, err := config.LoadDefaultConfig(
+				context.TODO(),
+				config.WithSharedConfigProfile(*newCacheEntry.Parameters.Profile),
+			)
+			if err != nil {
+				panic("configuration error, " + err.Error())
+			}
+			client := sts.NewFromConfig(cfg)
+			content = services.StsGetCallerIdentityProxy(newCacheEntry, client)
+		} else if newParms.AlmostEqual(services.Ec2DescribeRegionsParameter) {
+			newCacheEntry.Provider = "go"
+			cfg, err := config.LoadDefaultConfig(
+				context.TODO(),
+				// Specify the shared configuration profile to load.
+				config.WithSharedConfigProfile(*newCacheEntry.Parameters.Profile),
+			)
+			if err != nil {
+				panic("configuration error, " + err.Error())
+			}
+			client := ec2.NewFromConfig(cfg)
+			content = services.Ec2DescribeRegionsProxy(newCacheEntry, client)
+			if debug {
+				fmt.Print("Content:",content)
+			}
+		} else {
 			// just python aws cli
+			newCacheEntry.Provider = "python"
 			stdout, err := cmd.Output()
 			if err != nil {
 				log.Print(err.Error())
-				
+
 			}
 			data := string(stdout)
 			content = &data
@@ -90,20 +130,22 @@ func main() {
 			Created:       start,
 			LastAccessed:  start,
 			AccessCounter: 0,
+			Parameters:    newParms,
+			Provider: newCacheEntry.Provider,
 		}
 		awclip.WriteMetadata(metadata)
 	}
 	// Do not cache at all
-	if discriminated{
+	if discriminated {
 		stdout, err := cmd.Output()
 		if err != nil {
-		 	log.Print(err.Error())
-			
+			log.Print(err.Error())
+
 		}
 		data := string(stdout)
 		content = &data
 	}
 
-    fmt.Print(*content)
-	
+	fmt.Print(*content)
+
 }

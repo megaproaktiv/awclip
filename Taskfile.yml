@@ -9,16 +9,59 @@ tasks:
   build:
     sources: 
       - ./*.go
+      - services/*.go
       - ./main/main.go
     generates:
       - dist/awclip    
     cmds:
       - go build -o dist/awclip main/main.go
+
+  deploy:
+    deps: [build]
+    sources:
+      - dist/awclip
+    generates:
+      - ~/Documents/eprojects/prowler    
+    cmds:  
       - cp dist/awclip ~/Documents/eprojects/prowler  
+
   test:
     cmds:
       - go test ./... -v
+
+  test-ec2-clip:
+    desc: Test ec2 proxy
+    deps: [build, clean]
+    cmds:
+      - time dist/awclip ec2 describe-instances --output text --region "eu-central-1" --query "Reservations[*].Instances[*].[InstanceId]"  
+
+  test-sts-clip:
+    desc: Test sts proxy
+    deps: [build, clean]
+    cmds:
+      - time dist/awclip sts get-caller-identity 
+
+  test-sts-cli:
+    cmds:
+      - time aws sts get-caller-identity 
+
+  test-regions-clip:
+    desc: Test sts proxy
+    deps: [build, clean]
+    cmds:
+      - time dist/awclip ec2 describe-regions --query "Regions[].RegionName" --output text
+
+  test-regions-cli:
+    cmds:
+      - time aws ec2 describe-regions --query "Regions[].RegionName" --output text
+
+  test-ec2-cli:
+    desc: Test ec2 
+    cmds:
+      - time aws ec2 describe-instances --output text --region "eu-central-1" --query "Reservations[*].Instances[*].[InstanceId]"  
+    silent: false
   clean:
     desc: clean .awclip    
     cmds: 
       - rm .awclip/*  
+    ignore_error: true

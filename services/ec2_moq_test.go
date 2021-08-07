@@ -22,6 +22,9 @@ var _ Ec2Interface = &Ec2InterfaceMock{}
 //             DescribeInstancesFunc: func(ctx context.Context, params *ec2.DescribeInstancesInput, optFns ...func(*ec2.Options)) (*ec2.DescribeInstancesOutput, error) {
 // 	               panic("mock out the DescribeInstances method")
 //             },
+//             DescribeRegionsFunc: func(ctx context.Context, params *ec2.DescribeRegionsInput, optFns ...func(*ec2.Options)) (*ec2.DescribeRegionsOutput, error) {
+// 	               panic("mock out the DescribeRegions method")
+//             },
 //         }
 //
 //         // use mockedEc2Interface in code that requires Ec2Interface
@@ -31,6 +34,9 @@ var _ Ec2Interface = &Ec2InterfaceMock{}
 type Ec2InterfaceMock struct {
 	// DescribeInstancesFunc mocks the DescribeInstances method.
 	DescribeInstancesFunc func(ctx context.Context, params *ec2.DescribeInstancesInput, optFns ...func(*ec2.Options)) (*ec2.DescribeInstancesOutput, error)
+
+	// DescribeRegionsFunc mocks the DescribeRegions method.
+	DescribeRegionsFunc func(ctx context.Context, params *ec2.DescribeRegionsInput, optFns ...func(*ec2.Options)) (*ec2.DescribeRegionsOutput, error)
 
 	// calls tracks calls to the methods.
 	calls struct {
@@ -43,8 +49,18 @@ type Ec2InterfaceMock struct {
 			// OptFns is the optFns argument value.
 			OptFns []func(*ec2.Options)
 		}
+		// DescribeRegions holds details about calls to the DescribeRegions method.
+		DescribeRegions []struct {
+			// Ctx is the ctx argument value.
+			Ctx context.Context
+			// Params is the params argument value.
+			Params *ec2.DescribeRegionsInput
+			// OptFns is the optFns argument value.
+			OptFns []func(*ec2.Options)
+		}
 	}
 	lockDescribeInstances sync.RWMutex
+	lockDescribeRegions   sync.RWMutex
 }
 
 // DescribeInstances calls DescribeInstancesFunc.
@@ -83,5 +99,44 @@ func (mock *Ec2InterfaceMock) DescribeInstancesCalls() []struct {
 	mock.lockDescribeInstances.RLock()
 	calls = mock.calls.DescribeInstances
 	mock.lockDescribeInstances.RUnlock()
+	return calls
+}
+
+// DescribeRegions calls DescribeRegionsFunc.
+func (mock *Ec2InterfaceMock) DescribeRegions(ctx context.Context, params *ec2.DescribeRegionsInput, optFns ...func(*ec2.Options)) (*ec2.DescribeRegionsOutput, error) {
+	if mock.DescribeRegionsFunc == nil {
+		panic("Ec2InterfaceMock.DescribeRegionsFunc: method is nil but Ec2Interface.DescribeRegions was just called")
+	}
+	callInfo := struct {
+		Ctx    context.Context
+		Params *ec2.DescribeRegionsInput
+		OptFns []func(*ec2.Options)
+	}{
+		Ctx:    ctx,
+		Params: params,
+		OptFns: optFns,
+	}
+	mock.lockDescribeRegions.Lock()
+	mock.calls.DescribeRegions = append(mock.calls.DescribeRegions, callInfo)
+	mock.lockDescribeRegions.Unlock()
+	return mock.DescribeRegionsFunc(ctx, params, optFns...)
+}
+
+// DescribeRegionsCalls gets all the calls that were made to DescribeRegions.
+// Check the length with:
+//     len(mockedEc2Interface.DescribeRegionsCalls())
+func (mock *Ec2InterfaceMock) DescribeRegionsCalls() []struct {
+	Ctx    context.Context
+	Params *ec2.DescribeRegionsInput
+	OptFns []func(*ec2.Options)
+} {
+	var calls []struct {
+		Ctx    context.Context
+		Params *ec2.DescribeRegionsInput
+		OptFns []func(*ec2.Options)
+	}
+	mock.lockDescribeRegions.RLock()
+	calls = mock.calls.DescribeRegions
+	mock.lockDescribeRegions.RUnlock()
 	return calls
 }

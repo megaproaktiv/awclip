@@ -7,8 +7,7 @@ import (
 )
 
 const tmpdir = ".awclip"
-
-
+const debug = true
 
 func SpaceStringsBuilder(str string) string {
 	var b strings.Builder
@@ -16,11 +15,16 @@ func SpaceStringsBuilder(str string) string {
 	for _, ch := range str {
 		if !unicode.IsSpace(ch) {
 			b.WriteRune(ch)
-		}else{
-            b.WriteRune('_')
-        }
+		} else {
+			b.WriteRune('_')
+		}
 	}
 	return b.String()
+}
+
+
+func CacheMiss(id *string) bool {
+	return !CacheHit(id)
 }
 
 func CacheHit(id *string) bool {
@@ -33,7 +37,7 @@ func CacheHit(id *string) bool {
 }
 
 func GetLocationData(contentId *string) *string {
-	location := tmpdir + string(os.PathSeparator) + *contentId+ ".json"
+	location := tmpdir + string(os.PathSeparator) + *contentId + ".json"
 	return &location
 }
 func GetLocationMetaData(contentId *string) *string {
@@ -41,18 +45,18 @@ func GetLocationMetaData(contentId *string) *string {
 	return &location
 }
 
-
-// CleanUp
+// ArrangeParameters
 // if args contains "--profile" and "profilename", put them at the end
 // so optimizer can regognize it
-func CleanUp(args []string) []string{
-    for i, v := range args{
-        if v == "--profile" {
-            args = append(args, "--profile")
-            args = append(args, args[i+1])
-            args = append(args[:i], args[i+2:]... )
-            break
-        }
+func ArrangeParameters(args []string) []string {
+	for i, v := range args {
+		if v == "--profile" {
+			profileName := args[i+1]
+			args = append(args[:i], args[i+2:]...)
+			args = append(args, "--profile")
+			args = append(args, profileName)
+			break
+		}
 	}
-    return args
+	return args
 }
