@@ -35,6 +35,18 @@ tasks:
     cmds:
       - time dist/awclip ec2 describe-instances --output text --region "eu-central-1" --query "Reservations[*].Instances[*].[InstanceId]"  
 
+  test-ec2-clip-prefetch:
+    desc: Test ec2 proxy
+    deps: [build, clean]
+    cmds:
+      - time dist/awclip ec2 describe-instances --output text --profile ggtrcadmin --region "eu-north-1" --query "Reservations[*].Instances[*].[InstanceId]"  
+
+  test-ec2-cli:
+    desc: Test ec2 
+    cmds:
+      - time aws ec2 describe-instances --output text --region "eu-central-1" --query "Reservations[*].Instances[*].[InstanceId]"  
+    silent: false
+
   test-sts-clip:
     desc: Test sts proxy
     deps: [build, clean]
@@ -55,11 +67,7 @@ tasks:
     cmds:
       - time aws ec2 describe-regions --query "Regions[].RegionName" --output text
 
-  test-ec2-cli:
-    desc: Test ec2 
-    cmds:
-      - time aws ec2 describe-instances --output text --region "eu-central-1" --query "Reservations[*].Instances[*].[InstanceId]"  
-    silent: false
+
   clean:
     desc: clean .awclip    
     cmds: 

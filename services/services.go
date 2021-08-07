@@ -6,6 +6,7 @@ import (
 )
 
 const debug = false
+
 var AUTO_INIT bool
 
 func init() {

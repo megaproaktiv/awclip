@@ -74,6 +74,25 @@ func main() {
 		}
 		newCacheEntry.ArgumentsToCachedEntry(args)
 		newParms := newCacheEntry.Parameters
+
+		// CheckPrefetch
+		if ( *newCacheEntry.Parameters.Region == services.FirstRegion) && newParms.AlmostEqual(services.Ec2DescribeInstancesParameter) {
+			if debug {
+				fmt.Println("Start prefetch")
+			}
+			newCacheEntry.Provider = "go"
+			cfg, err := config.LoadDefaultConfig(
+				context.TODO(),
+				// Specify the shared configuration profile to load.
+				config.WithSharedConfigProfile(*newCacheEntry.Parameters.Profile),
+			)
+			if err != nil {
+				panic("configuration error, " + err.Error())
+			}
+			client := ec2.NewFromConfig(cfg)
+			services.PrefetchEc2DescribeInstancesProxy(newCacheEntry,client, args)
+		}
+
 		if newParms.AlmostEqual(services.Ec2DescribeInstancesParameter) {
 			newCacheEntry.Provider = "go"
 			cfg, err := config.LoadDefaultConfig(

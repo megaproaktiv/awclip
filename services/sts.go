@@ -28,38 +28,36 @@ var StsGetCallerIdentityParameter = &awclip.Parameters{
 
 type GetCallerIdentity struct {
 	Account *string
-	Arn *string
-	UserId *string
+	Arn     *string
+	UserId  *string
 }
-
 
 func StsGetCallerIdentityProxy(config *awclip.CacheEntry, client StSInterface) *string {
 
 	var response *sts.GetCallerIdentityOutput
 	var err error
-	
+
 	if len(*config.Parameters.Region) > 4 {
 		response, err = client.GetCallerIdentity(context.TODO(), nil, func(o *sts.Options) {
 			o.Region = *config.Parameters.Region
 		})
-	}else{
+	} else {
 		response, err = client.GetCallerIdentity(context.TODO(), nil)
 	}
 
 	if err != nil {
 		log.Println("Cant connect to sts service")
-		log.Println("Region:",*config.Parameters.Region)
+		log.Println("Region:", *config.Parameters.Region)
 		log.Fatal(err)
 	}
-	
+
 	caller := &GetCallerIdentity{
 		Account: response.Account,
 		Arn:     response.Arn,
 		UserId:  response.UserId,
 	}
-	
+
 	contentB, err := json.Marshal(caller)
 	content := string(contentB)
 	return &content
 }
-

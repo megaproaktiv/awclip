@@ -67,6 +67,17 @@ time aws iam list-roles >/dev/null
  0,00s user 0,00s system 40% cpu 0,014 total
 ```
 
+## run certain api calls in awclip
+
+The following aws cli command are used by prowler and are beeing performed by awclip.
+
+- `aws ec2 describe-instances --query "Reservations[*].Instances[*].[InstanceId]" --output text`
+- `aws ec2 describe-regions --query "Regions[].RegionName" --output text`
+- `aws sts get-caller-identity`
+
+If a call is recognized as a supported call, the metadata says: `"Provider":"go"`.
+The aws cli calls have `"Provider":"python"`
+
 ## Working with prowler
 
 Change `include/awscli_detector`
@@ -104,6 +115,8 @@ if you copy awclip into the same directory.
 
 
 
+### v0.1.4  
+- implement api calls with specific query in program
 ### v0.1.0
 - reads command line
 - calls aws with (python) aws cli
