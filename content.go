@@ -24,8 +24,8 @@ func ReadContent(id *string) (*string, error) {
 }
 
 func ReadContentUpdate(id *string) (*string, error) {
-	
-	content,err := ReadContent(id)
+
+	content, err := ReadContent(id)
 	if err != nil {
 		return nil, err
 	}

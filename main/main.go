@@ -1,17 +1,12 @@
 package main
 
 import (
-	"context"
 	"time"
 
 	"fmt"
 	"log"
 	"os"
 	"os/exec"
-
-	"github.com/aws/aws-sdk-go-v2/config"
-	"github.com/aws/aws-sdk-go-v2/service/ec2"
-	"github.com/aws/aws-sdk-go-v2/service/sts"
 
 	"github.com/megaproaktiv/awclip"
 	"github.com/megaproaktiv/awclip/services"
@@ -52,6 +47,7 @@ func main() {
 				Output:  new(string),
 				Region:  new(string),
 				Profile: new(string),
+				Parameters: map[string]*string{},
 				Query:   new(string),
 			},
 			Provider: "tbd",
@@ -78,6 +74,10 @@ func main() {
 		if newParms.AlmostEqual(services.Ec2DescribeRegionsParameter) {
 			content = services.Ec2DescribeRegionsProxy(newCacheEntry)
 		} 
+
+		if newParms.AlmostEqual(services.IamListUserPoliciesParamater){
+			content = services.IamListUserPoliciesProxy(newCacheEntry)
+		}
 		
 		// no actions in go => use python cli
 		if newCacheEntry.Provider == "tdb" {

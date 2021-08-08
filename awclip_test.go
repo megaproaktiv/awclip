@@ -37,7 +37,6 @@ func TestCleanUp(t *testing.T) {
 				"myprofile",
 			},
 		},
-		
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

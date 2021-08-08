@@ -6,7 +6,7 @@ import (
 	"log"
 )
 
-func CommandLine(args []string) *string{
+func CommandLine(args []string) *string {
 	seperator := "_"
 	commandLine := "aws"
 	for i := 1; i < len(args)-1; i++ {
@@ -19,7 +19,7 @@ func CommandLine(args []string) *string{
 }
 
 // HashVaule calculates the id of the cahce entries
-func HashValue(commandLine *string) *string{
+func HashValue(commandLine *string) *string {
 	hash := md5.Sum([]byte(*commandLine))
 	hashstring := hex.EncodeToString(hash[:])
 	return &hashstring

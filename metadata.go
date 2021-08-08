@@ -5,14 +5,17 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"strings"
 	"time"
+
+	"github.com/aws/aws-sdk-go-v2/aws"
 )
 
 type ApiCallProviderName string
 
 const (
 	ApiCallProviderNameAws ApiCallProviderName = "aws cli python"
-	ApiCallProviderNameGo ApiCallProviderName = "go sdk v2"
+	ApiCallProviderNameGo  ApiCallProviderName = "go sdk v2"
 )
 
 type ApiCallProvider struct {
@@ -21,12 +24,13 @@ type ApiCallProvider struct {
 }
 
 type Parameters struct {
-	Service *string
-	Action  *string
-	Output  *string
-	Region  *string
-	Profile *string
-	Query   *string
+	Service    *string
+	Action     *string
+	Output     *string
+	Region     *string
+	Profile    *string
+	Parameters map[string]*string
+	Query      *string
 }
 
 // CacheEntry
@@ -38,7 +42,7 @@ type CacheEntry struct {
 	LastAccessed  time.Time
 	AccessCounter int
 	Parameters    Parameters
-	Provider string
+	Provider      string
 }
 
 func WriteMetadata(md *CacheEntry) error {
@@ -122,26 +126,63 @@ func (item *CacheEntry) ArgumentsToCachedEntry(args []string) {
 	action := args[2]
 	*item.Parameters.Action = action
 	for i, arg := range args {
-		if arg == "--query" {
-			*item.Parameters.Query = args[i+1]
-		}
-		if arg == "--region" {
-			*item.Parameters.Region = args[i+1]
-		}
-		if arg == "--profile" {
-			*item.Parameters.Profile = args[i+1]
-		}
-		if arg == "--output" {
-			*item.Parameters.Output = args[i+1]
+		found := false
+		if strings.HasPrefix(arg, "--") {
+			if arg == "--query" {
+				*item.Parameters.Query = args[i+1]
+				found = true
+			}
+			if arg == "--region" {
+				*item.Parameters.Region = args[i+1]
+				found = true
+			}
+			if arg == "--profile" {
+				*item.Parameters.Profile = args[i+1]
+				found = true
+			}
+			if arg == "--output" {
+				*item.Parameters.Output = args[i+1]
+				found = true
+			}
+			if !found {
+				// --action
+				action := strings.Split(arg, "--")[1] 
+				item.Parameters.Parameters[action] = aws.String(args[i+1])
+			}
 		}
 	}
 }
 
 func (a *Parameters) AlmostEqual(b *Parameters) bool {
-	if 	*a.Service == *b.Service &&
+	if *a.Service == *b.Service &&
 		*a.Action == *b.Action &&
 		*a.Output == *b.Output &&
 		*a.Query == *b.Query {
+		return true
+	}
+	return false
+}
+
+func (a *Parameters) AlmostEqualWithParameters(b *Parameters) bool {
+	if *a.Service == *b.Service &&
+		*a.Action == *b.Action &&
+		*a.Output == *b.Output &&
+		*a.Query == *b.Query {
+		if len(a.Parameters) != len(b.Parameters) {
+			return false
+		}
+		// All Parameters exist?
+		for key := range a.Parameters {
+			value, ok := b.Parameters[key]
+			if !ok {
+				return false
+			}
+			if !(*a.Parameters[key] == "*") {
+				if !(*a.Parameters[key] == *value) {
+					return false
+				}
+			}
+		}
 		return true
 	}
 	return false

@@ -7,6 +7,8 @@ import (
 
 const debug = false
 
+var any = "*"
+
 var AUTO_INIT bool
 
 func init() {

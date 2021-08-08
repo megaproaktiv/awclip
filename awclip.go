@@ -22,7 +22,6 @@ func SpaceStringsBuilder(str string) string {
 	return b.String()
 }
 
-
 func CacheMiss(id *string) bool {
 	return !CacheHit(id)
 }

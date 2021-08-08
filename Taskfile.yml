@@ -3,7 +3,7 @@
 version: '3'
 
 vars:
-  GREETING: Hello, World!
+  profile: letsbuild
 
 tasks:
   build:
@@ -64,6 +64,16 @@ tasks:
     cmds:
       - time aws ec2 describe-instances --output text --region "eu-central-1" --query "Reservations[*].Instances[*].[InstanceId]"  
     silent: false
+
+  test-user-policies-cli:
+    desc: test user policies aws cli
+    cmds:
+      - cmd:  time aws iam list-user-policies --output text --region eu-central-1 --user-name former2 --profile ggtrcadmin
+
+  test-user-policies-clip:
+    desc: test user policies aws cli
+    cmds:
+      - cmd:  time aws iam list-user-policies --output text --region eu-central-1 --user-name former2 --profile ggtrcadmin
 
   test-sts-clip:
     desc: Test sts proxy

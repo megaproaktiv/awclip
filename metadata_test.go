@@ -13,13 +13,36 @@ func TestArgumentsToCachedEntry(t *testing.T) {
 		args []string
 		item *awclip.CacheEntry
 	}
-	newCacheEntry := &awclip.CacheEntry{
+	newCacheEntry1 := &awclip.CacheEntry{
 		Parameters: awclip.Parameters{
-			Service:  new(string),
+			Service: new(string),
 			Action:  new(string),
 			Output:  new(string),
 			Region:  new(string),
 			Profile: new(string),
+			Parameters: map[string]*string{},
+			Query:   new(string),
+		},
+	}
+	newCacheEntry2 := &awclip.CacheEntry{
+		Parameters: awclip.Parameters{
+			Service: new(string),
+			Action:  new(string),
+			Output:  new(string),
+			Region:  new(string),
+			Profile: new(string),
+			Parameters: map[string]*string{},
+			Query:   new(string),
+		},
+	}
+	newCacheEntry3 := &awclip.CacheEntry{
+		Parameters: awclip.Parameters{
+			Service: new(string),
+			Action:  new(string),
+			Output:  new(string),
+			Region:  new(string),
+			Profile: new(string),
+			Parameters: map[string]*string{},
 			Query:   new(string),
 		},
 	}
@@ -45,8 +68,7 @@ func TestArgumentsToCachedEntry(t *testing.T) {
 					"--profile",
 					"myprofile",
 				},
-				item: newCacheEntry,
-				
+				item: newCacheEntry1,
 			},
 			want: &awclip.Parameters{
 				Service: aws.String("ec2"),
@@ -54,9 +76,10 @@ func TestArgumentsToCachedEntry(t *testing.T) {
 				Output:  aws.String("text"),
 				Region:  aws.String("eu-central-1"),
 				Profile: aws.String("myprofile"),
+				Parameters: map[string]*string{},
 				Query:   aws.String("Reservations[*].Instances[*].[InstanceId]"),
 			},
-		},		
+		},
 		{
 			name: "recognise ec2 Describe Regions",
 			args: args{
@@ -73,7 +96,7 @@ func TestArgumentsToCachedEntry(t *testing.T) {
 					"--output",
 					"text",
 				},
-				item: newCacheEntry,
+				item: newCacheEntry2,
 			},
 			want: &awclip.Parameters{
 				Service: aws.String("ec2"),
@@ -81,7 +104,36 @@ func TestArgumentsToCachedEntry(t *testing.T) {
 				Output:  aws.String("text"),
 				Region:  aws.String("eu-central-1"),
 				Profile: aws.String("helmut"),
+				Parameters: map[string]*string{},
 				Query:   aws.String("Regions[].RegionName"),
+			},
+		},
+		{
+			name: "recognise iam User Parameter",
+			args: args{
+				args: []string{
+					"dist/awclip",
+					"iam",
+					"list-user-policies",
+					"--profile",
+					"helmut",
+					"--user-name",
+					"johndonkey",
+					"--region",
+					"eu-central-1",
+					"--output",
+					"text",
+				},
+				item: newCacheEntry3,
+			},
+			want: &awclip.Parameters{
+				Service:    aws.String("iam"),
+				Action:     aws.String("list-user-policies"),
+				Output:     aws.String("text"),
+				Region:     aws.String("eu-central-1"),
+				Profile:    aws.String("helmut"),
+				Query:      aws.String(""),
+				Parameters: map[string]*string{"user-name": aws.String("johndonkey")},
 			},
 		},
 	}
