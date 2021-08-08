@@ -7,9 +7,9 @@ import (
 )
 
 func CommandLine(args []string) *string {
-	seperator := "_"
+	seperator := " "
 	commandLine := "aws"
-	for i := 1; i < len(args)-1; i++ {
+	for i := 0; i < len(args)-1; i++ {
 		commandLine += seperator + args[1+i]
 	}
 	if debug {

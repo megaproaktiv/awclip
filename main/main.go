@@ -17,7 +17,8 @@ func main() {
 
 	prg := "aws"
 
-	command := os.Args[1]
+	service := os.Args[1]
+	action := os.Args[2]
 	
 	if debug {
 		log.Println("Parameters: ", os.Args)
@@ -30,7 +31,7 @@ func main() {
 
 	var content *string
 
-	discriminated := awclip.DiscriminatedCommand(&command)
+	discriminated := awclip.DiscriminatedCommand(&service,&action)
 	if awclip.CacheHit(id) && !discriminated {
 		// Hit
 		content, _ = awclip.ReadContentUpdate(id)
@@ -80,7 +81,7 @@ func main() {
 		}
 		
 		// no actions in go => use python cli
-		if newCacheEntry.Provider == "tdb" {
+		if newCacheEntry.Provider == "tbd" {
 			// just python aws cli
 			newCacheEntry.Provider = "python"
 			stdout, err := cmd.Output()
@@ -92,7 +93,6 @@ func main() {
 			content = &data
 		}
 
-		awclip.WriteContent(id, content)
 		start := time.Now()
 		metadata := &awclip.CacheEntry{
 			Id:            id,
@@ -104,6 +104,7 @@ func main() {
 			Provider: newCacheEntry.Provider,
 		}
 		awclip.WriteMetadata(metadata)
+		awclip.WriteContent(id, content)
 	}
 	// Do not cache at all
 	if discriminated {

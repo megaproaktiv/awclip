@@ -72,8 +72,9 @@ tasks:
 
   test-user-policies-clip:
     desc: test user policies aws cli
+    deps: [build, clean]
     cmds:
-      - cmd:  time aws iam list-user-policies --output text --region eu-central-1 --user-name former2 --profile ggtrcadmin
+      - cmd:  time dist/awclip iam list-user-policies --output text --region eu-central-1 --user-name former2 --profile ggtrcadmin
 
   test-sts-clip:
     desc: Test sts proxy

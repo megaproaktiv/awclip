@@ -114,7 +114,8 @@ if you copy awclip into the same directory.
 ## Version 
 
 
-
+### v0.1.6
+  - implement iam list-user-policies with additional parameters
 ### v0.1.4  
 - implement api calls with specific query in program
 ### v0.1.0

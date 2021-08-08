@@ -57,6 +57,7 @@ func IamListUserPoliciesProxy(entry *awclip.CacheEntry) *string {
 	if err != nil {
 		log.Println("Cant connect to iam service")
 		log.Println("Region:", *entry.Parameters.Region)
+		log.Println("Parms:", *iamParms.UserName)
 		log.Fatal(err)
 	}
 	content := ""
