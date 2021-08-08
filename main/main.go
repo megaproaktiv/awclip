@@ -76,8 +76,12 @@ func main() {
 			content = services.Ec2DescribeRegionsProxy(newCacheEntry)
 		} 
 
-		if newParms.AlmostEqual(services.IamListUserPoliciesParamater){
+		if newParms.AlmostEqualWithParameters(services.IamListUserPoliciesParameter){
 			content = services.IamListUserPoliciesProxy(newCacheEntry)
+		}
+
+		if newParms.AlmostEqualWithParameters(services.IamListAttachedUserPoliciesParameter){
+			content = services.IamListAttachedUserPoliciesProxy(newCacheEntry)
 		}
 		
 		// no actions in go => use python cli

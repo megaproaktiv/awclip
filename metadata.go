@@ -177,7 +177,7 @@ func (a *Parameters) AlmostEqualWithParameters(b *Parameters) bool {
 			if !ok {
 				return false
 			}
-			if !(*a.Parameters[key] == "*") {
+			if !(*value == "*") {
 				if !(*a.Parameters[key] == *value) {
 					return false
 				}

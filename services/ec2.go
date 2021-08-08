@@ -106,7 +106,7 @@ func Ec2DescribeRegionsProxy(newCacheEntry *awclip.CacheEntry) *string {
 	client := ec2.NewFromConfig(cfg)
 
 	var response *ec2.DescribeRegionsOutput
-	
+
 	if len(*newCacheEntry.Parameters.Region) > 4 {
 		response, err = client.DescribeRegions(context.TODO(), nil, func(o *ec2.Options) {
 			o.Region = *newCacheEntry.Parameters.Region

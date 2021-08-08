@@ -1,11 +1,13 @@
 package awclip_test
 
 import (
-	"gotest.tools/assert"
 	"testing"
+
+	"gotest.tools/assert"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/megaproaktiv/awclip"
+	"github.com/megaproaktiv/awclip/services"
 )
 
 func TestArgumentsToCachedEntry(t *testing.T) {
@@ -36,6 +38,17 @@ func TestArgumentsToCachedEntry(t *testing.T) {
 		},
 	}
 	newCacheEntry3 := &awclip.CacheEntry{
+		Parameters: awclip.Parameters{
+			Service: new(string),
+			Action:  new(string),
+			Output:  new(string),
+			Region:  new(string),
+			Profile: new(string),
+			Parameters: map[string]*string{},
+			Query:   new(string),
+		},
+	}
+	newCacheEntry4 := &awclip.CacheEntry{
 		Parameters: awclip.Parameters{
 			Service: new(string),
 			Action:  new(string),
@@ -136,6 +149,34 @@ func TestArgumentsToCachedEntry(t *testing.T) {
 				Parameters: map[string]*string{"user-name": aws.String("johndonkey")},
 			},
 		},
+		{
+			name: "recognise list-attached-user-policies",
+			args: args{
+				args: []string{
+					"dist/awclip",
+					"iam",
+					"list-attached-user-policies",
+					"--profile",
+					"helmut",
+					"--user-name",
+					"johndonkey",
+					"--region",
+					"eu-central-1",
+					"--output",
+					"text",
+				},
+				item: newCacheEntry4,
+			},
+			want: &awclip.Parameters{
+				Service:    aws.String("iam"),
+				Action:     aws.String("list-attached-user-policies"),
+				Output:     aws.String("text"),
+				Region:     aws.String("eu-central-1"),
+				Profile:    aws.String("helmut"),
+				Query:      aws.String(""),
+				Parameters: map[string]*string{"user-name": aws.String("johndonkey")},
+			},
+		},
 	}
 
 	for _, tt := range tests {
@@ -146,4 +187,22 @@ func TestArgumentsToCachedEntry(t *testing.T) {
 
 		})
 	}
+}
+
+
+func TestAlmostEqualWithParameters(t *testing.T) {
+
+	newParms := &awclip.Parameters{
+		Service:    aws.String("iam"),
+		Action:     aws.String("list-attached-user-policies"),
+		Output:     aws.String("text"),
+		Region:     aws.String("eu-central-1"),
+		Profile:    aws.String("helmut"),
+		Query:      aws.String(""),
+		Parameters: map[string]*string{"user-name": aws.String("johndonkey")},
+	}
+
+
+	ok := newParms.AlmostEqualWithParameters(services.IamListAttachedUserPoliciesParameter)
+	assert.Equal(t,true, ok ,"IamListAttachedUserPoliciesParameter should be matched")
 }
