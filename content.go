@@ -23,6 +23,21 @@ func ReadContent(id *string) (*string, error) {
 	return &content, nil
 }
 
+func ReadContentUpdate(id *string) (*string, error) {
+	
+	content,err := ReadContent(id)
+	if err != nil {
+		return nil, err
+	}
+
+	metadata, _ := ReadMetaData(id)
+	err = UpdateMetaData(metadata)
+	if err != nil {
+		log.Print(err)
+	}
+	return content, nil
+}
+
 func WriteContent(id *string, content *string) error {
 	location := GetLocationData(id)
 	file, err := os.OpenFile(*location, os.O_RDWR|os.O_CREATE, 0755)

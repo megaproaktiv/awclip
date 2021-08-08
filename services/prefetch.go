@@ -1,6 +1,7 @@
 package services
 
 import (
+	"context"
 	"crypto/md5"
 	"encoding/hex"
 	"fmt"
@@ -8,6 +9,8 @@ import (
 	"time"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/config"
+	"github.com/aws/aws-sdk-go-v2/service/ec2"
 	"github.com/megaproaktiv/awclip"
 )
 
@@ -34,6 +37,23 @@ var (
 	}
 )
 
+func PrefetchEc2DescribeInstancesProxyWrapper(newCacheEntry *awclip.CacheEntry, args []string) {
+	if debug {
+		fmt.Println("Start prefetch")
+	}
+	newCacheEntry.Provider = "go"
+	cfg, err := config.LoadDefaultConfig(
+		context.TODO(),
+		// Specify the shared configuration profile to load.
+		config.WithSharedConfigProfile(*newCacheEntry.Parameters.Profile),
+	)
+	if err != nil {
+		panic("configuration error, " + err.Error())
+	}
+	client := ec2.NewFromConfig(cfg)
+	PrefetchEc2DescribeInstancesProxy(newCacheEntry, client, args)
+}
+
 func PrefetchEc2DescribeInstancesProxy(config *awclip.CacheEntry, client Ec2Interface, args []string) error {
 	var wg sync.WaitGroup
 
@@ -54,7 +74,6 @@ func PrefetchEc2DescribeInstancesProxy(config *awclip.CacheEntry, client Ec2Inte
 		hash := md5.Sum([]byte(commandLine))
 		hashstring := hex.EncodeToString(hash[:])
 		id := &hashstring
-		
 
 		regionalEntry := *config
 		regionalEntry.Parameters.Region = &region
@@ -62,8 +81,7 @@ func PrefetchEc2DescribeInstancesProxy(config *awclip.CacheEntry, client Ec2Inte
 		if awclip.CacheMiss(id) {
 
 			wg.Add(1)
-			go calcInstances(&wg ,id , args , region, client) 
-			
+			go calcInstances(&wg, id, args, region, client)
 
 		}
 		if debug {
@@ -88,7 +106,7 @@ func replaceRegion(args []string, region string) []string {
 	return args
 }
 
-func calcInstances(wg *sync.WaitGroup,id *string, args []string, region string, client Ec2Interface) {
+func calcInstances(wg *sync.WaitGroup, id *string, args []string, region string, client Ec2Interface) {
 	defer wg.Done()
 	newCacheEntry := &awclip.CacheEntry{
 		Parameters: awclip.Parameters{
@@ -109,7 +127,7 @@ func calcInstances(wg *sync.WaitGroup,id *string, args []string, region string, 
 		fmt.Println("Prefetch - Call proxy: ", region)
 	}
 
-	localContent := Ec2DescribeInstancesProxy(newCacheEntry, client)
+	localContent := Ec2DescribeInstancesProxy(newCacheEntry)
 	if debug {
 		fmt.Println("Prefetch - localContent: ", len(*localContent))
 	}

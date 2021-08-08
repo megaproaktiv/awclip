@@ -7,7 +7,7 @@ import (
 )
 
 const tmpdir = ".awclip"
-const debug = true
+const debug = false
 
 func SpaceStringsBuilder(str string) string {
 	var b strings.Builder

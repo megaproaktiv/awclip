@@ -2,13 +2,12 @@ package main
 
 import (
 	"context"
-	"crypto/md5"
-	"encoding/hex"
+	"time"
+
 	"fmt"
 	"log"
 	"os"
 	"os/exec"
-	"time"
 
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/ec2"
@@ -23,39 +22,24 @@ func main() {
 
 	prg := "aws"
 
-	seperator := "_"
-	commandLine := "aws"
 	command := os.Args[1]
 	
 	if debug {
 		log.Println("Parameters: ", os.Args)
 	}
 	args := awclip.ArrangeParameters(os.Args)
-	for i := 1; i < len(args)-1; i++ {
-		commandLine += seperator + args[1+i]
-	}
+	commandLine := awclip.CommandLine(args)
+	id := awclip.HashValue(commandLine)
 
-	if debug {
-		log.Println("CommandLine: ", commandLine)
-	}
 	cmd := exec.Command(prg, args[1:]...)
-
-	hash := md5.Sum([]byte(commandLine))
-	hashstring := hex.EncodeToString(hash[:])
-	id := &hashstring
-	start := time.Now()
 
 	var content *string
 
 	discriminated := awclip.DiscriminatedCommand(&command)
 	if awclip.CacheHit(id) && !discriminated {
 		// Hit
-		content, _ = awclip.ReadContent(id)
-		metadata, _ := awclip.ReadMetaData(id)
-		err := awclip.UpdateMetaData(metadata)
-		if err != nil {
-			log.Print(err)
-		}
+		content, _ = awclip.ReadContentUpdate(id)
+		
 	}
 
 	//Miss => create entry
@@ -76,62 +60,27 @@ func main() {
 		newParms := newCacheEntry.Parameters
 
 		// CheckPrefetch
-		if ( *newCacheEntry.Parameters.Region == services.FirstRegion) && newParms.AlmostEqual(services.Ec2DescribeInstancesParameter) {
-			if debug {
-				fmt.Println("Start prefetch")
+		if ( *newCacheEntry.Parameters.Region == services.FirstRegion) {
+			if newParms.AlmostEqual(services.Ec2DescribeInstancesParameter) {
+				services.PrefetchEc2DescribeInstancesProxyWrapper(newCacheEntry ,args)
 			}
-			newCacheEntry.Provider = "go"
-			cfg, err := config.LoadDefaultConfig(
-				context.TODO(),
-				// Specify the shared configuration profile to load.
-				config.WithSharedConfigProfile(*newCacheEntry.Parameters.Profile),
-			)
-			if err != nil {
-				panic("configuration error, " + err.Error())
-			}
-			client := ec2.NewFromConfig(cfg)
-			services.PrefetchEc2DescribeInstancesProxy(newCacheEntry,client, args)
 		}
 
+		// Actions implemented in go
 		if newParms.AlmostEqual(services.Ec2DescribeInstancesParameter) {
-			newCacheEntry.Provider = "go"
-			cfg, err := config.LoadDefaultConfig(
-				context.TODO(),
-				// Specify the shared configuration profile to load.
-				config.WithSharedConfigProfile(*newCacheEntry.Parameters.Profile),
-			)
-			if err != nil {
-				panic("configuration error, " + err.Error())
-			}
-			client := ec2.NewFromConfig(cfg)
-			content = services.Ec2DescribeInstancesProxy(newCacheEntry, client) 
-		} else if newParms.AlmostEqual(services.StsGetCallerIdentityParameter) {
-			newCacheEntry.Provider = "go"
-			cfg, err := config.LoadDefaultConfig(
-				context.TODO(),
-				config.WithSharedConfigProfile(*newCacheEntry.Parameters.Profile),
-			)
-			if err != nil {
-				panic("configuration error, " + err.Error())
-			}
-			client := sts.NewFromConfig(cfg)
-			content = services.StsGetCallerIdentityProxy(newCacheEntry, client)
-		} else if newParms.AlmostEqual(services.Ec2DescribeRegionsParameter) {
-			newCacheEntry.Provider = "go"
-			cfg, err := config.LoadDefaultConfig(
-				context.TODO(),
-				// Specify the shared configuration profile to load.
-				config.WithSharedConfigProfile(*newCacheEntry.Parameters.Profile),
-			)
-			if err != nil {
-				panic("configuration error, " + err.Error())
-			}
-			client := ec2.NewFromConfig(cfg)
-			content = services.Ec2DescribeRegionsProxy(newCacheEntry, client)
-			if debug {
-				fmt.Print("Content:",content)
-			}
-		} else {
+			content = services.Ec2DescribeInstancesProxy(newCacheEntry) 
+		} 
+		
+		if newParms.AlmostEqual(services.StsGetCallerIdentityParameter) {
+			content = services.StsGetCallerIdentityProxy(newCacheEntry)
+		} 
+		
+		if newParms.AlmostEqual(services.Ec2DescribeRegionsParameter) {
+			content = services.Ec2DescribeRegionsProxy(newCacheEntry)
+		} 
+		
+		// no actions in go => use python cli
+		if newCacheEntry.Provider == "tdb" {
 			// just python aws cli
 			newCacheEntry.Provider = "python"
 			stdout, err := cmd.Output()
@@ -142,10 +91,12 @@ func main() {
 			data := string(stdout)
 			content = &data
 		}
+
 		awclip.WriteContent(id, content)
+		start := time.Now()
 		metadata := &awclip.CacheEntry{
 			Id:            id,
-			Cmd:           &commandLine,
+			Cmd:           commandLine,
 			Created:       start,
 			LastAccessed:  start,
 			AccessCounter: 0,

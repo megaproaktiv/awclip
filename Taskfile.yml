@@ -35,6 +35,24 @@ tasks:
     cmds:
       - time dist/awclip ec2 describe-instances --output text --region "eu-central-1" --query "Reservations[*].Instances[*].[InstanceId]"  
 
+  test-ec2:
+    desc: diff ec2 clip ec2 cli
+    deps: [clean,build]
+    cmds:
+      - cmd: echo ec2 describe instances
+        silent: true
+      - cmd: echo aws
+        silent: true
+      - cmd: time aws ec2 describe-instances  --output text --region "eu-central-1" --query "Reservations[*].Instances[*].[InstanceId]"  >testdata/out/ec2-di-cli.json
+        silent: true
+      - cmd: echo awclip
+        silent: true
+      - cmd: time dist/awclip ec2 describe-instances --output text --region "eu-central-1" --query "Reservations[*].Instances[*].[InstanceId]"  >testdata/out/ec2-di-clip.json
+        silent: true
+      - cmd: echo test
+      - cmd: diff testdata/out/ec2-di-cli.json testdata/out/ec2-di-clip.json && echo "PASS"
+        silent: true
+
   test-ec2-clip-prefetch:
     desc: Test ec2 proxy
     deps: [build, clean]
