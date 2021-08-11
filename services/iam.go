@@ -19,6 +19,19 @@ type IamInterface interface {
 	ListAttachedUserPolicies(ctx context.Context,
 		params *iam.ListAttachedUserPoliciesInput,
 		optFns ...func(*iam.Options)) (*iam.ListAttachedUserPoliciesOutput, error)
+	ListUsers(ctx context.Context,
+		params *iam.ListUsersInput,
+		optFns ...func(*iam.Options)) (*iam.ListUsersOutput, error)	
+}
+
+var IamListUserParameter = &awclip.Parameters{
+	Service:    aws.String("iam"),
+	Action:     aws.String("list-users"),
+	Output:     aws.String("text"),
+	Region:     aws.String("*"),
+	Profile:    aws.String("*"),
+	AdditionalParameters: map[string]*string{"user-name": &any},
+	Query:      aws.String("Users[*].UserName"),
 }
 
 var IamListUserPoliciesParameter = &awclip.Parameters{
@@ -27,7 +40,7 @@ var IamListUserPoliciesParameter = &awclip.Parameters{
 	Output:     aws.String("text"),
 	Region:     aws.String("*"),
 	Profile:    aws.String("*"),
-	Parameters: map[string]*string{"user-name": &any},
+	AdditionalParameters: map[string]*string{"user-name": &any},
 	Query:      aws.String(""),
 }
 
@@ -37,28 +50,22 @@ var IamListAttachedUserPoliciesParameter = &awclip.Parameters{
 	Output:     aws.String("text"),
 	Region:     aws.String("*"),
 	Profile:    aws.String("*"),
-	Parameters: map[string]*string{"user-name": &any},
+	AdditionalParameters: map[string]*string{"user-name": &any},
 	Query:      aws.String(""),
 }
 
 func IamListUserPoliciesProxy(entry *awclip.CacheEntry) *string {
-	if debug {
+	if Debug {
 		fmt.Println("IamListUserPoliciesProxy - Start : ", *entry.Parameters.Region)
 	}
 
 	entry.Provider = "go"
-	cfg, err := config.LoadDefaultConfig(
-		context.TODO(),
-		// Specify the shared configuration profile to load.
-		config.WithSharedConfigProfile(*entry.Parameters.Profile),
-	)
-	if err != nil {
-		panic("configuration error, " + err.Error())
-	}
-	client := iam.NewFromConfig(cfg)
+	var err error
+	client := ProfiledIamClient(entry)
+
 	var response *iam.ListUserPoliciesOutput
 	iamParms := &iam.ListUserPoliciesInput{
-		UserName: entry.Parameters.Parameters["user-name"],
+		UserName: entry.Parameters.AdditionalParameters["user-name"],
 	}
 	if len(*entry.Parameters.Region) > 4 {
 		response, err = client.ListUserPolicies(context.TODO(), iamParms, func(o *iam.Options) {
@@ -82,24 +89,50 @@ func IamListUserPoliciesProxy(entry *awclip.CacheEntry) *string {
 	return &content
 }
 
-func IamListAttachedUserPoliciesProxy(entry *awclip.CacheEntry) *string {
-	if debug {
-		fmt.Println("IamListAttachedUserPoliciesProxy - Start : ", *entry.Parameters.Region)
-	}
-
+func IamListUserProxy(entry *awclip.CacheEntry) *string {
 	entry.Provider = "go"
-	cfg, err := config.LoadDefaultConfig(
-		context.TODO(),
-		// Specify the shared configuration profile to load.
-		config.WithSharedConfigProfile(*entry.Parameters.Profile),
-	)
-	if err != nil {
-		panic("configuration error, " + err.Error())
+	var err error
+	client := ProfiledIamClient(entry)
+	var response  *iam.ListUsersOutput 
+	iamParams := &iam.ListUsersInput{}
+	if len(*entry.Parameters.Region) > 4 {
+		response, err = client.ListUsers(context.TODO(), iamParams, func(o *iam.Options) {
+			o.Region = *entry.Parameters.Region
+		})
+	} else {
+		response, err = client.ListUsers(context.TODO(), iamParams)
 	}
-	client := iam.NewFromConfig(cfg)
+	if err != nil {
+		log.Println("Cant connect to iam service - listusers")
+		log.Println("Region:", *entry.Parameters.Region)
+		log.Fatal(err)
+	}
+	content := ""
+	
+	first := true
+	for _, k := range response.Users {	
+		if first {
+			first = false
+		}else{
+			content = content + TAB
+		}
+		content = content + *k.UserName
+	}
+	
+	content = content + NL
+
+	return &content
+
+}
+
+func IamListAttachedUserPoliciesProxy(entry *awclip.CacheEntry) *string {
+	entry.Provider = "go"
+	var err error
+	client := ProfiledIamClient(entry)
+
 	var response *iam.ListAttachedUserPoliciesOutput
 	iamParms := &iam.ListAttachedUserPoliciesInput{
-		UserName: entry.Parameters.Parameters["user-name"],
+		UserName: entry.Parameters.AdditionalParameters["user-name"],
 	}
 	if len(*entry.Parameters.Region) > 4 {
 		response, err = client.ListAttachedUserPolicies(context.TODO(), iamParms, func(o *iam.Options) {
@@ -116,12 +149,24 @@ func IamListAttachedUserPoliciesProxy(entry *awclip.CacheEntry) *string {
 	}
 	content := ""
 	header := "ATTACHEDPOLICIES"
-	const TAB = "\t"
-	const NL = "\n"
+
 	for _, k := range response.AttachedPolicies {	
 		content = content + header+TAB+*k.PolicyArn + TAB + *k.PolicyName + NL
 	}
 	
 
 	return &content
+}
+
+
+func ProfiledIamClient(entry *awclip.CacheEntry) *iam.Client{
+	cfg, err := config.LoadDefaultConfig(
+		context.TODO(),
+		// Specify the shared configuration profile to load.
+		config.WithSharedConfigProfile(*entry.Parameters.Profile),
+	)
+	if err != nil {
+		panic("configuration error, " + err.Error())
+	}
+	return  iam.NewFromConfig(cfg)
 }

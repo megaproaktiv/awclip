@@ -5,14 +5,16 @@ import (
 	"strings"
 )
 
-const debug = false
-
+const TAB = "\t"
+const NL = "\n"
 var any = "*"
 
 var AUTO_INIT bool
+var Debug bool
 
 func init() {
 	AUTO_INIT = true
+	Debug = false
 }
 
 func Autoinit() bool {

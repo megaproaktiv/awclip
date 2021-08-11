@@ -113,7 +113,14 @@ if you copy awclip into the same directory.
 
 ## Version 
 
-
+### current
+### v0.1.8
+  ## ADD
+  - add iam list-users
+  - add prefetch lambda list function (prowler 762)
+  - baxch script tests
+  ## CHANGE
+  - change id to struct parameter based, not cmd line based
 ### v0.1.6
   - implement iam list-user-policies with additional parameters
 ### v0.1.4  

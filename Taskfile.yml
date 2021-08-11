@@ -9,12 +9,18 @@ tasks:
   build:
     sources: 
       - ./*.go
-      - services/*.go
+      - ./services/*.go
+      - services/prefetch.go
+      - services/lambda.go
       - ./main/main.go
     generates:
       - dist/awclip    
     cmds:
       - go build -o dist/awclip main/main.go
+
+  generate:
+    cmds:
+      - go generate ./...
 
   deploy:
     deps: [build]
@@ -28,6 +34,23 @@ tasks:
   test:
     cmds:
       - go test ./... -v
+
+  test-bash:
+    cmds:
+      - task: test-ec2
+      - task: clean
+      - task: test-lambda
+      - task: clean
+      - cmd: echo "should be 38"
+        silent: true
+      - cmd: wc .awclip/* | tail -n 1
+        silent: true
+      - task: clean
+      - cmd: echo "sts gettcalleridentity - Should give no error"  
+      - task: test-sts-clip
+      - cmd: echo "ec2 get regions - Should give no error"  
+      - task: test-regions-both
+
 
   test-ec2-clip:
     desc: Test ec2 proxy
@@ -65,6 +88,21 @@ tasks:
       - time aws ec2 describe-instances --output text --region "eu-central-1" --query "Reservations[*].Instances[*].[InstanceId]"  
     silent: false
 
+  test-lambda:
+    desc: Test Lambda List Functions
+    deps: [clean, build]
+    cmds:
+     - dist/awclip lambda list-functions --region eu-north-1 --output text --query "Functions[*].{R:Runtime,N:FunctionName}" --profile ggtrcadmin    
+    silent: false
+
+  test-regions:
+    desc: Region test for prefetch - goroutines
+    deps: [clean, build]
+    cmds:
+      - clear
+      - dist/awclip lambda list-functions --region eu-north-1 --output text --query "Functions[*].{R:Runtime,N:FunctionName}" --profile ggtrcadmin 
+      - dist/awclip lambda list-functions --region eu-central-1 --output text --query "Functions[*].{R:Runtime,N:FunctionName}" --profile ggtrcadmin
+
   test-user-policies-cli:
     desc: test user policies aws cli
     cmds:
@@ -85,6 +123,23 @@ tasks:
   test-sts-cli:
     cmds:
       - time aws sts get-caller-identity 
+
+  ## When you have problems, check with "od -cb"    
+  test-regions-both:
+    desc: Regions
+    deps: [clean, build]
+    cmds:
+      - cmd: echo "Fetching regions with cli"
+        silent: true
+      - cmd: aws ec2 describe-regions --query "Regions[].RegionName" --output text >testdata/out/ec2-describe-regions-cli.txt
+      - cmd: echo "Fetching regions with clip"
+        silent: true
+      - cmd: dist/awclip ec2 describe-regions --query "Regions[].RegionName" --output text >testdata/out/ec2-describe-regions-clip.txt
+      - cmd: echo "Diff outputs"
+        silent: true
+      - cmd: diff testdata/out/ec2-describe-regions-cli.txt testdata/out/ec2-describe-regions-clip.txt && echo "PASS"
+        silent: true
+
 
   test-regions-clip:
     desc: Test sts proxy

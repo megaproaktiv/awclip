@@ -1,8 +1,6 @@
 package main
 
 import (
-	"time"
-
 	"fmt"
 	"log"
 	"os"
@@ -13,7 +11,9 @@ import (
 )
 const debug = false
 
+
 func main() {
+	services.Debug = false
 
 	prg := "aws"
 
@@ -24,9 +24,22 @@ func main() {
 		log.Println("Parameters: ", os.Args)
 	}
 	args := awclip.ArrangeParameters(os.Args)
-	commandLine := awclip.CommandLine(args)
-	id := awclip.HashValue(commandLine)
+	parameters :=  awclip.Parameters{}
+	parameters.ArgumentsToCachedEntry(args)
+	id := parameters.HashValue()
+	
+	metadata := &awclip.CacheEntry{
+		Id: id,
+		Cmd: parameters.CommandLine(),
+		Parameters: parameters,
+	}
+	
+	
 
+	if debug {
+		fmt.Println("Main cmd: \n",*metadata.Cmd)
+		fmt.Println("Main id: \n",*id)
+	}
 	cmd := exec.Command(prg, args[1:]...)
 
 	var content *string
@@ -41,25 +54,16 @@ func main() {
 	//Miss => create entry
 	if awclip.CacheMiss(id) && !discriminated {
 		// fastproxy available?
-		newCacheEntry := &awclip.CacheEntry{
-			Parameters: awclip.Parameters{
-				Service: new(string),
-				Action:  new(string),
-				Output:  new(string),
-				Region:  new(string),
-				Profile: new(string),
-				Parameters: map[string]*string{},
-				Query:   new(string),
-			},
-			Provider: "tbd",
-		}
-		newCacheEntry.ArgumentsToCachedEntry(args)
-		newParms := newCacheEntry.Parameters
+		newCacheEntry :=metadata
+		newParms := metadata.Parameters
 
 		// CheckPrefetch
 		if ( *newCacheEntry.Parameters.Region == services.FirstRegion) {
-			if newParms.AlmostEqual(services.Ec2DescribeInstancesParameter) {
+			if newParms.AlmostEqual(services.Ec2DescribeInstancesParameter ) {
 				services.PrefetchEc2DescribeInstancesProxyWrapper(newCacheEntry ,args)
+			}
+			if newParms.AlmostEqual((services.LambdaListFunctionsParameter)){
+				services.PrefetchLambdaListFunctionsProxyWrapper(newCacheEntry)
 			}
 		}
 
@@ -80,8 +84,16 @@ func main() {
 			content = services.IamListUserPoliciesProxy(newCacheEntry)
 		}
 
+		if newParms.AlmostEqual((services.IamListUserParameter)){
+			content = services.IamListUserProxy(newCacheEntry)
+		}
+		
 		if newParms.AlmostEqualWithParameters(services.IamListAttachedUserPoliciesParameter){
 			content = services.IamListAttachedUserPoliciesProxy(newCacheEntry)
+		}
+
+		if newParms.AlmostEqual((services.LambdaListFunctionsParameter)){
+			content = services.LambdaListFunctionsProxy(newCacheEntry)
 		}
 		
 		// no actions in go => use python cli
@@ -97,16 +109,7 @@ func main() {
 			content = &data
 		}
 
-		start := time.Now()
-		metadata := &awclip.CacheEntry{
-			Id:            id,
-			Cmd:           commandLine,
-			Created:       start,
-			LastAccessed:  start,
-			AccessCounter: 0,
-			Parameters:    newParms,
-			Provider: newCacheEntry.Provider,
-		}
+		metadata.Provider = newCacheEntry.Provider
 		awclip.WriteMetadata(metadata)
 		awclip.WriteContent(id, content)
 	}

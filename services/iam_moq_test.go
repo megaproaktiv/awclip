@@ -19,8 +19,14 @@ var _ IamInterface = &IamInterfaceMock{}
 //
 //         // make and configure a mocked IamInterface
 //         mockedIamInterface := &IamInterfaceMock{
+//             ListAttachedUserPoliciesFunc: func(ctx context.Context, params *iam.ListAttachedUserPoliciesInput, optFns ...func(*iam.Options)) (*iam.ListAttachedUserPoliciesOutput, error) {
+// 	               panic("mock out the ListAttachedUserPolicies method")
+//             },
 //             ListUserPoliciesFunc: func(ctx context.Context, params *iam.ListUserPoliciesInput, optFns ...func(*iam.Options)) (*iam.ListUserPoliciesOutput, error) {
 // 	               panic("mock out the ListUserPolicies method")
+//             },
+//             ListUsersFunc: func(ctx context.Context, params *iam.ListUsersInput, optFns ...func(*iam.Options)) (*iam.ListUsersOutput, error) {
+// 	               panic("mock out the ListUsers method")
 //             },
 //         }
 //
@@ -29,11 +35,26 @@ var _ IamInterface = &IamInterfaceMock{}
 //
 //     }
 type IamInterfaceMock struct {
+	// ListAttachedUserPoliciesFunc mocks the ListAttachedUserPolicies method.
+	ListAttachedUserPoliciesFunc func(ctx context.Context, params *iam.ListAttachedUserPoliciesInput, optFns ...func(*iam.Options)) (*iam.ListAttachedUserPoliciesOutput, error)
+
 	// ListUserPoliciesFunc mocks the ListUserPolicies method.
 	ListUserPoliciesFunc func(ctx context.Context, params *iam.ListUserPoliciesInput, optFns ...func(*iam.Options)) (*iam.ListUserPoliciesOutput, error)
 
+	// ListUsersFunc mocks the ListUsers method.
+	ListUsersFunc func(ctx context.Context, params *iam.ListUsersInput, optFns ...func(*iam.Options)) (*iam.ListUsersOutput, error)
+
 	// calls tracks calls to the methods.
 	calls struct {
+		// ListAttachedUserPolicies holds details about calls to the ListAttachedUserPolicies method.
+		ListAttachedUserPolicies []struct {
+			// Ctx is the ctx argument value.
+			Ctx context.Context
+			// Params is the params argument value.
+			Params *iam.ListAttachedUserPoliciesInput
+			// OptFns is the optFns argument value.
+			OptFns []func(*iam.Options)
+		}
 		// ListUserPolicies holds details about calls to the ListUserPolicies method.
 		ListUserPolicies []struct {
 			// Ctx is the ctx argument value.
@@ -43,8 +64,58 @@ type IamInterfaceMock struct {
 			// OptFns is the optFns argument value.
 			OptFns []func(*iam.Options)
 		}
+		// ListUsers holds details about calls to the ListUsers method.
+		ListUsers []struct {
+			// Ctx is the ctx argument value.
+			Ctx context.Context
+			// Params is the params argument value.
+			Params *iam.ListUsersInput
+			// OptFns is the optFns argument value.
+			OptFns []func(*iam.Options)
+		}
 	}
-	lockListUserPolicies sync.RWMutex
+	lockListAttachedUserPolicies sync.RWMutex
+	lockListUserPolicies         sync.RWMutex
+	lockListUsers                sync.RWMutex
+}
+
+// ListAttachedUserPolicies calls ListAttachedUserPoliciesFunc.
+func (mock *IamInterfaceMock) ListAttachedUserPolicies(ctx context.Context, params *iam.ListAttachedUserPoliciesInput, optFns ...func(*iam.Options)) (*iam.ListAttachedUserPoliciesOutput, error) {
+	if mock.ListAttachedUserPoliciesFunc == nil {
+		panic("IamInterfaceMock.ListAttachedUserPoliciesFunc: method is nil but IamInterface.ListAttachedUserPolicies was just called")
+	}
+	callInfo := struct {
+		Ctx    context.Context
+		Params *iam.ListAttachedUserPoliciesInput
+		OptFns []func(*iam.Options)
+	}{
+		Ctx:    ctx,
+		Params: params,
+		OptFns: optFns,
+	}
+	mock.lockListAttachedUserPolicies.Lock()
+	mock.calls.ListAttachedUserPolicies = append(mock.calls.ListAttachedUserPolicies, callInfo)
+	mock.lockListAttachedUserPolicies.Unlock()
+	return mock.ListAttachedUserPoliciesFunc(ctx, params, optFns...)
+}
+
+// ListAttachedUserPoliciesCalls gets all the calls that were made to ListAttachedUserPolicies.
+// Check the length with:
+//     len(mockedIamInterface.ListAttachedUserPoliciesCalls())
+func (mock *IamInterfaceMock) ListAttachedUserPoliciesCalls() []struct {
+	Ctx    context.Context
+	Params *iam.ListAttachedUserPoliciesInput
+	OptFns []func(*iam.Options)
+} {
+	var calls []struct {
+		Ctx    context.Context
+		Params *iam.ListAttachedUserPoliciesInput
+		OptFns []func(*iam.Options)
+	}
+	mock.lockListAttachedUserPolicies.RLock()
+	calls = mock.calls.ListAttachedUserPolicies
+	mock.lockListAttachedUserPolicies.RUnlock()
+	return calls
 }
 
 // ListUserPolicies calls ListUserPoliciesFunc.
@@ -83,5 +154,44 @@ func (mock *IamInterfaceMock) ListUserPoliciesCalls() []struct {
 	mock.lockListUserPolicies.RLock()
 	calls = mock.calls.ListUserPolicies
 	mock.lockListUserPolicies.RUnlock()
+	return calls
+}
+
+// ListUsers calls ListUsersFunc.
+func (mock *IamInterfaceMock) ListUsers(ctx context.Context, params *iam.ListUsersInput, optFns ...func(*iam.Options)) (*iam.ListUsersOutput, error) {
+	if mock.ListUsersFunc == nil {
+		panic("IamInterfaceMock.ListUsersFunc: method is nil but IamInterface.ListUsers was just called")
+	}
+	callInfo := struct {
+		Ctx    context.Context
+		Params *iam.ListUsersInput
+		OptFns []func(*iam.Options)
+	}{
+		Ctx:    ctx,
+		Params: params,
+		OptFns: optFns,
+	}
+	mock.lockListUsers.Lock()
+	mock.calls.ListUsers = append(mock.calls.ListUsers, callInfo)
+	mock.lockListUsers.Unlock()
+	return mock.ListUsersFunc(ctx, params, optFns...)
+}
+
+// ListUsersCalls gets all the calls that were made to ListUsers.
+// Check the length with:
+//     len(mockedIamInterface.ListUsersCalls())
+func (mock *IamInterfaceMock) ListUsersCalls() []struct {
+	Ctx    context.Context
+	Params *iam.ListUsersInput
+	OptFns []func(*iam.Options)
+} {
+	var calls []struct {
+		Ctx    context.Context
+		Params *iam.ListUsersInput
+		OptFns []func(*iam.Options)
+	}
+	mock.lockListUsers.RLock()
+	calls = mock.calls.ListUsers
+	mock.lockListUsers.RUnlock()
 	return calls
 }

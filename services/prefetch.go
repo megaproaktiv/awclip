@@ -2,8 +2,6 @@ package services
 
 import (
 	"context"
-	"crypto/md5"
-	"encoding/hex"
 	"fmt"
 	"sync"
 	"time"
@@ -11,6 +9,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/ec2"
+	"github.com/aws/aws-sdk-go-v2/service/lambda"
 	"github.com/megaproaktiv/awclip"
 )
 
@@ -38,10 +37,10 @@ var (
 )
 
 func PrefetchEc2DescribeInstancesProxyWrapper(newCacheEntry *awclip.CacheEntry, args []string) {
-	if debug {
+	if Debug {
 		fmt.Println("Start prefetch")
 	}
-	newCacheEntry.Provider = "go"
+	newCacheEntry.Provider = "go-prefetch"
 	cfg, err := config.LoadDefaultConfig(
 		context.TODO(),
 		// Specify the shared configuration profile to load.
@@ -51,40 +50,97 @@ func PrefetchEc2DescribeInstancesProxyWrapper(newCacheEntry *awclip.CacheEntry, 
 		panic("configuration error, " + err.Error())
 	}
 	client := ec2.NewFromConfig(cfg)
+	if newCacheEntry.Parameters.Region == nil {
+		newCacheEntry.Parameters.Region = &cfg.Region
+	}
 	PrefetchEc2DescribeInstancesProxy(newCacheEntry, client, args)
 }
 
-func PrefetchEc2DescribeInstancesProxy(config *awclip.CacheEntry, client Ec2Interface, args []string) error {
+func PrefetchLambdaListFunctionsProxyWrapper(metadata *awclip.CacheEntry) {
+	if Debug {
+		fmt.Println("Start prefetch")
+	}
+	metadata.Provider = "go"
+	cfg, err := config.LoadDefaultConfig(
+		context.TODO(),
+		// Specify the shared configuration profile to load.
+		config.WithSharedConfigProfile(*metadata.Parameters.Profile),
+	)
+	if err != nil {
+		panic("configuration error, " + err.Error())
+	}
+	client := lambda.NewFromConfig(cfg)
+	if metadata.Parameters.Region == nil {
+		metadata.Parameters.Region = &cfg.Region
+	}
+	if Debug {
+		fmt.Println("prefetch line 75 Region:", *metadata.Parameters.Region)
+	}
+	PrefetchLambdaListFunctionsProxy(metadata, client)
+}
+
+func PrefetchEc2DescribeInstancesProxy(metadata *awclip.CacheEntry, client Ec2Interface, args []string) error {
 	var wg sync.WaitGroup
 
-	seperator := "_"
 
 	for _, region := range regions {
-		region := region
-
-		if debug {
+		
+		if Debug {
 			fmt.Println("Range Region: ", region)
 		}
+		
+		metadata.Parameters.Region = &region
 		//reCalc ID
-		commandLine := "aws"
-		args := replaceRegion(args, region)
-		for i := 1; i < len(args)-1; i++ {
-			commandLine += seperator + args[1+i]
-		}
-		hash := md5.Sum([]byte(commandLine))
-		hashstring := hex.EncodeToString(hash[:])
-		id := &hashstring
+		id :=metadata.Parameters.HashValue()
 
-		regionalEntry := *config
+		regionalEntry := *metadata
 		regionalEntry.Parameters.Region = &region
 
 		if awclip.CacheMiss(id) {
 
 			wg.Add(1)
-			go calcInstances(&wg, id, args, region, client)
+			go calcInstances(&wg, id, metadata, client)
 
 		}
-		if debug {
+		if Debug {
+			fmt.Println("Prefetch - cache miss: ", region)
+		}
+
+	}
+	wg.Wait()
+
+	return nil
+
+}
+func PrefetchLambdaListFunctionsProxy(metadata *awclip.CacheEntry, client LambdaInterface) error {
+	var wg sync.WaitGroup
+
+	var MetadataRegionMap = make(map[string] *awclip.CacheEntry)
+	for _, region := range regions {
+
+		if Debug {
+			fmt.Println("Range Region: ", region)
+		}
+		//reCalc ID
+		MetadataRegionMap[region] = metadata.Copy()
+
+		// If region is bound to goroutine, the value will change
+		MetadataRegionMap[region].Parameters.Region = aws.String(region)
+		
+		MetadataRegionMap[region].Id =MetadataRegionMap[region].Parameters.HashValue()
+		
+		if Debug {
+			fmt.Println("prefetch:129 Lambda  id:",*MetadataRegionMap[region].Id)
+			fmt.Println("prefetch:130 Lambda  region:",*MetadataRegionMap[region].Parameters.Region)
+			fmt.Printf("prefetch:131 Meta %v \nLocalmeta %v",MetadataRegionMap[region],metadata)
+		}
+		
+		if awclip.CacheMiss(MetadataRegionMap[region].Id) {			
+			wg.Add(1)
+			go calcFunctions(&wg, MetadataRegionMap[region], client)
+
+		}
+		if Debug {
 			fmt.Println("Prefetch - cache miss: ", region)
 		}
 
@@ -106,42 +162,44 @@ func replaceRegion(args []string, region string) []string {
 	return args
 }
 
-func calcInstances(wg *sync.WaitGroup, id *string, args []string, region string, client Ec2Interface) {
+func calcInstances(wg *sync.WaitGroup, id *string, metadata *awclip.CacheEntry, client Ec2Interface) {
 	defer wg.Done()
-	newCacheEntry := &awclip.CacheEntry{
-		Parameters: awclip.Parameters{
-			Service: new(string),
-			Action:  new(string),
-			Output:  new(string),
-			Region:  new(string),
-			Profile: new(string),
-			Query:   new(string),
-		},
-		Provider: "tbd",
-	}
-	newCacheEntry.ArgumentsToCachedEntry(args)
-	newCacheEntry.Parameters.Region = &region
-	newParms := newCacheEntry.Parameters
-	newCacheEntry.Provider = "go"
-	if debug {
-		fmt.Println("Prefetch - Call proxy: ", region)
-	}
-
-	localContent := Ec2DescribeInstancesProxy(newCacheEntry)
-	if debug {
-		fmt.Println("Prefetch - localContent: ", len(*localContent))
+	
+	localContent := Ec2DescribeInstancesProxy(metadata)
+	if Debug {
+		fmt.Println("Prefetch ec2 line 164  localContent: ", len(*localContent))
 	}
 
 	awclip.WriteContent(id, localContent)
 	start := time.Now()
-	metadata := &awclip.CacheEntry{
-		Id:            id,
-		Cmd:           aws.String("prefetch"),
-		Created:       start,
-		LastAccessed:  start,
-		AccessCounter: 0,
-		Parameters:    newParms,
-		Provider:      newCacheEntry.Provider,
-	}
+	
+	metadata.Created = start
+	metadata.LastAccessed=  start
+	metadata.AccessCounter= 0
+	metadata.Provider = "go - prefetch"
 	awclip.WriteMetadata(metadata)
+}
+
+
+func calcFunctions(wg *sync.WaitGroup,  meta *awclip.CacheEntry, client LambdaInterface) {
+	defer wg.Done()
+	
+	if Debug {
+		fmt.Println("prefetch:184 ", meta.Parameters.Region)
+		fmt.Println("prefetch Line 183 Region:", *meta.Parameters.Region)
+		fmt.Println("prefetch Line 187 metadata *:", meta)
+	}
+	localContent := LambdaListFunctionsProxy(meta)
+	if Debug {
+		fmt.Println("Prefetch:189 - localContent length lambda: ", len(*localContent))
+	}
+	
+	awclip.WriteContent(meta.Id, localContent)
+	start := time.Now()
+	meta.Created = start
+	meta.LastAccessed=  start
+	meta.AccessCounter= 0
+	meta.Provider = "go - prefetch"
+
+	awclip.WriteMetadata(meta)
 }

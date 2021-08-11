@@ -1,0 +1,2 @@
+ATTACHEDPOLICIES	arn:aws:iam::aws:policy/AmazonCognitoReadOnly	AmazonCognitoReadOnly
+ATTACHEDPOLICIES	arn:aws:iam::aws:policy/AmazonChimeReadOnly	AmazonChimeReadOnly

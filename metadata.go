@@ -1,7 +1,6 @@
 package awclip
 
 import (
-	"encoding/json"
 	"io/ioutil"
 	"log"
 	"os"
@@ -29,12 +28,14 @@ type Parameters struct {
 	Output     *string
 	Region     *string
 	Profile    *string
-	Parameters map[string]*string
+	AdditionalParameters map[string]*string
 	Query      *string
 }
 
 // CacheEntry
 // Cmd executable command line e.g. aws ec2 describe instances
+//go:generate ffjson metadata.go
+
 type CacheEntry struct {
 	Id            *string
 	Cmd           *string
@@ -48,7 +49,7 @@ type CacheEntry struct {
 func WriteMetadata(md *CacheEntry) error {
 	location := GetLocationMetaData(md.Id)
 
-	content, err := json.Marshal(md)
+	content, err := md.MarshalJSON()
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -87,7 +88,8 @@ func ReadMetaData(id *string) (*CacheEntry, error) {
 		return nil, err
 	}
 	var metadata CacheEntry
-	json.Unmarshal(data, &metadata)
+	// json.Unmarshal(data, &metadata)
+	metadata.UnmarshalJSON(data)
 	if err != nil {
 		log.Printf("failed Unmarshal file: %s", err)
 		return nil, err
@@ -99,7 +101,8 @@ func ReadMetaData(id *string) (*CacheEntry, error) {
 func UpdateMetaData(md *CacheEntry) error {
 	location := GetLocationMetaData(md.Id)
 	md.AccessCounter += 1
-	content, err := json.Marshal(md)
+	// content, err := json.Marshal(md)
+	content, err := md.MarshalJSON()
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -120,37 +123,46 @@ func UpdateMetaData(md *CacheEntry) error {
 	return nil
 }
 
-func (item *CacheEntry) ArgumentsToCachedEntry(args []string) {
+func (Parameters *Parameters) ArgumentsToCachedEntry(args []string) {
 	service := args[1]
-	*item.Parameters.Service = service
+	Parameters.Service = &service
 	action := args[2]
-	*item.Parameters.Action = action
+	Parameters.Action = &action
+	if Parameters.AdditionalParameters == nil {
+		Parameters.AdditionalParameters = make(map[string]*string)
+	}
 	for i, arg := range args {
 		found := false
 		if strings.HasPrefix(arg, "--") {
 			if arg == "--query" {
-				*item.Parameters.Query = args[i+1]
+				Parameters.Query = &args[i+1]
 				found = true
 			}
 			if arg == "--region" {
-				*item.Parameters.Region = args[i+1]
+				Parameters.Region = &args[i+1]
 				found = true
 			}
 			if arg == "--profile" {
-				*item.Parameters.Profile = args[i+1]
+				Parameters.Profile = &args[i+1]
 				found = true
 			}
 			if arg == "--output" {
-				*item.Parameters.Output = args[i+1]
+				Parameters.Output = &args[i+1]
 				found = true
 			}
 			if !found {
 				// --action
 				action := strings.Split(arg, "--")[1] 
-				item.Parameters.Parameters[action] = aws.String(args[i+1])
+				if len(args) > (i+1)  {
+					Parameters.AdditionalParameters[action] = aws.String(args[i+1])
+				}
 			}
 		}
 	}
+	Parameters.Query = emptyWhenNil(Parameters.Query)
+	Parameters.Region = emptyWhenNil(Parameters.Region)
+	Parameters.Profile = emptyWhenNil(Parameters.Profile)
+	Parameters.Output = emptyWhenNil(Parameters.Output)
 }
 
 func (a *Parameters) AlmostEqual(b *Parameters) bool {
@@ -168,17 +180,17 @@ func (a *Parameters) AlmostEqualWithParameters(b *Parameters) bool {
 		*a.Action == *b.Action &&
 		*a.Output == *b.Output &&
 		*a.Query == *b.Query {
-		if len(a.Parameters) != len(b.Parameters) {
+		if len(a.AdditionalParameters) != len(b.AdditionalParameters) {
 			return false
 		}
 		// All Parameters exist?
-		for key := range a.Parameters {
-			value, ok := b.Parameters[key]
+		for key := range a.AdditionalParameters {
+			value, ok := b.AdditionalParameters[key]
 			if !ok {
 				return false
 			}
 			if !(*value == "*") {
-				if !(*a.Parameters[key] == *value) {
+				if !(*a.AdditionalParameters[key] == *value) {
 					return false
 				}
 			}
@@ -186,4 +198,37 @@ func (a *Parameters) AlmostEqualWithParameters(b *Parameters) bool {
 		return true
 	}
 	return false
+}
+
+func (d *CacheEntry) Copy() *CacheEntry{
+	if d.Cmd == nil {
+		panic("cmd of Cache Entry must be nonzero")
+	}
+	newD := &CacheEntry{
+		Id:            aws.String(*d.Id),
+		Cmd:           aws.String(*d.Cmd),
+		Created:       time.Now(),
+		LastAccessed:  time.Now(),
+		AccessCounter: 0,
+		Parameters:    *d.Parameters.Copy(),
+		Provider:      "",
+	}
+	return newD
+}
+
+func (p *Parameters) Copy() *Parameters{
+	addOns := make(map[string]*string)
+	for index, element  := range p.AdditionalParameters{        
+		addOns[index] = element
+   }
+	newP := &Parameters{
+		Service:    emptyWhenNil(p.Service),
+		Action:     emptyWhenNil(p.Action),
+		Output:     emptyWhenNil(p.Output),
+		Region:     emptyWhenNil(p.Region),
+		Profile:    emptyWhenNil(p.Profile),
+		AdditionalParameters: map[string]*string{},
+		Query:      emptyWhenNil(p.Query),
+	}
+	return newP
 }

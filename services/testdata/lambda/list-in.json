@@ -1,0 +1,454 @@
+{
+    "Functions": [
+        {
+            "FunctionName": "ask-custom-messeguide-default",
+            "FunctionArn": "arn:aws:lambda:eu-central-1:669453403305:function:ask-custom-messeguide-default",
+            "Runtime": "nodejs8.10",
+            "Role": "arn:aws:iam::669453403305:role/ask-lambda-messeguide",
+            "Handler": "index.handler",
+            "CodeSize": 44273279,
+            "Description": "",
+            "Timeout": 8,
+            "MemorySize": 128,
+            "LastModified": "2019-10-24T12:45:54.497+0000",
+            "CodeSha256": "91AqDOKJkfd0Rgq/6HYmDE++MmC/ueuKzVmeweYizHQ=",
+            "Version": "$LATEST",
+            "TracingConfig": {
+                "Mode": "PassThrough"
+            },
+            "RevisionId": "5b147264-c593-4028-88a0-a0e6a3c4eace",
+            "PackageType": "Zip"
+        },
+        {
+            "FunctionName": "amplify-login-custom-message-80c9d7a7",
+            "FunctionArn": "arn:aws:lambda:eu-central-1:669453403305:function:amplify-login-custom-message-80c9d7a7",
+            "Runtime": "nodejs12.x",
+            "Role": "arn:aws:iam::669453403305:role/amplify-login-lambda-80c9d7a7",
+            "Handler": "index.handler",
+            "CodeSize": 828,
+            "Description": "",
+            "Timeout": 15,
+            "MemorySize": 256,
+            "LastModified": "2020-12-10T15:43:00.017+0000",
+            "CodeSha256": "CsltlV7pXuODlQ5hpPDSXoHK2Vcp4pgeaQ9H7XxfD8A=",
+            "Version": "$LATEST",
+            "TracingConfig": {
+                "Mode": "PassThrough"
+            },
+            "RevisionId": "b5b196bd-acd9-4562-bc48-e8ff9d762f8f",
+            "PackageType": "Zip"
+        },
+        {
+            "FunctionName": "Demo2",
+            "FunctionArn": "arn:aws:lambda:eu-central-1:669453403305:function:Demo2",
+            "Runtime": "nodejs14.x",
+            "Role": "arn:aws:iam::669453403305:role/service-role/Demo2-role-j4o79xrc",
+            "Handler": "index.handler",
+            "CodeSize": 262,
+            "Description": "",
+            "Timeout": 10,
+            "MemorySize": 1024,
+            "LastModified": "2021-05-26T10:25:03.580+0000",
+            "CodeSha256": "TBNkIMxdH4lq/MHGhOs+Au05kiUnJkNTVJUnqsvz0yA=",
+            "Version": "$LATEST",
+            "TracingConfig": {
+                "Mode": "PassThrough"
+            },
+            "RevisionId": "1c9ada6f-20b3-4c2f-8865-722fa15526b0",
+            "PackageType": "Zip"
+        },
+        {
+            "FunctionName": "UpdateSecuritySubAccounts",
+            "FunctionArn": "arn:aws:lambda:eu-central-1:669453403305:function:UpdateSecuritySubAccounts",
+            "Runtime": "nodejs12.x",
+            "Role": "arn:aws:iam::669453403305:role/service-role/UpdateSecuritySubAccounts-role-pds59zna",
+            "Handler": "index.handler",
+            "CodeSize": 382,
+            "Description": "A starter AWS Lambda function.",
+            "Timeout": 3,
+            "MemorySize": 128,
+            "LastModified": "2020-11-17T08:24:38.716+0000",
+            "CodeSha256": "hhJ3qmDZaJISFo1hh6vPd6mEAf22gIuZbMGuxS2IQQk=",
+            "Version": "$LATEST",
+            "TracingConfig": {
+                "Mode": "PassThrough"
+            },
+            "RevisionId": "45ff3a5c-0888-4ff4-a071-34f5d6b6b379",
+            "PackageType": "Zip"
+        },
+        {
+            "FunctionName": "demo2",
+            "FunctionArn": "arn:aws:lambda:eu-central-1:669453403305:function:demo2",
+            "Runtime": "java11",
+            "Role": "arn:aws:iam::669453403305:role/service-role/demo2-role-be7bzkoz",
+            "Handler": "example.Hello::handleRequest",
+            "CodeSize": 8928,
+            "Description": "",
+            "Timeout": 15,
+            "MemorySize": 1024,
+            "LastModified": "2021-05-20T10:05:20.037+0000",
+            "CodeSha256": "jYP1nUIZ6A7Mqr3J5GwlBCMva56NpgTZDLKGRkT7LQo=",
+            "Version": "$LATEST",
+            "TracingConfig": {
+                "Mode": "PassThrough"
+            },
+            "RevisionId": "d03c96f9-eb72-4e78-a883-5fc706f8f93e",
+            "PackageType": "Zip"
+        },
+        {
+            "FunctionName": "demo",
+            "FunctionArn": "arn:aws:lambda:eu-central-1:669453403305:function:demo",
+            "Runtime": "nodejs12.x",
+            "Role": "arn:aws:iam::669453403305:role/service-role/demo-role-a9zrcebj",
+            "Handler": "index.handler",
+            "CodeSize": 319,
+            "Description": "A starter AWS Lambda function.",
+            "Timeout": 3,
+            "MemorySize": 1024,
+            "LastModified": "2021-05-26T10:25:12.128+0000",
+            "CodeSha256": "iKlb+i5Pj62jbggxxrgK2Uxg0tpSOD4aVQAYgSallww=",
+            "Version": "$LATEST",
+            "TracingConfig": {
+                "Mode": "PassThrough"
+            },
+            "RevisionId": "8864d7bc-b192-4842-a96a-beb25499ffbe",
+            "PackageType": "Zip"
+        },
+        {
+            "FunctionName": "amplify-login-verify-auth-challenge-80c9d7a7",
+            "FunctionArn": "arn:aws:lambda:eu-central-1:669453403305:function:amplify-login-verify-auth-challenge-80c9d7a7",
+            "Runtime": "nodejs12.x",
+            "Role": "arn:aws:iam::669453403305:role/amplify-login-lambda-80c9d7a7",
+            "Handler": "index.handler",
+            "CodeSize": 6816646,
+            "Description": "",
+            "Timeout": 15,
+            "MemorySize": 256,
+            "LastModified": "2020-12-10T15:42:59.876+0000",
+            "CodeSha256": "bNBdGK3H888hrBTVJBDDLg36R3AC1QEXsu8vAdarUr8=",
+            "Version": "$LATEST",
+            "Environment": {
+                "Variables": {
+                    "ENDPOINT": "https://nnbsynycoe.execute-api.eu-central-1.amazonaws.com/prod"
+                }
+            },
+            "TracingConfig": {
+                "Mode": "PassThrough"
+            },
+            "RevisionId": "d6fee329-1ceb-4a3b-a0d3-68450ee819fd",
+            "PackageType": "Zip"
+        },
+        {
+            "FunctionName": "Demo",
+            "FunctionArn": "arn:aws:lambda:eu-central-1:669453403305:function:Demo",
+            "Runtime": "nodejs12.x",
+            "Role": "arn:aws:iam::669453403305:role/service-role/Demo-role-hx60q3zy",
+            "Handler": "index.handler",
+            "CodeSize": 304,
+            "Description": "",
+            "Timeout": 2,
+            "MemorySize": 3008,
+            "LastModified": "2020-04-22T11:14:54.621+0000",
+            "CodeSha256": "k33TggGtygLrDDrEecfHuvfuVd+6bRxCFv7lErxWOJ0=",
+            "Version": "$LATEST",
+            "TracingConfig": {
+                "Mode": "PassThrough"
+            },
+            "RevisionId": "d4bfe31a-9153-4da4-99a9-80126bb21941",
+            "PackageType": "Zip"
+        },
+        {
+            "FunctionName": "amplify-login-define-auth-challenge-80c9d7a7",
+            "FunctionArn": "arn:aws:lambda:eu-central-1:669453403305:function:amplify-login-define-auth-challenge-80c9d7a7",
+            "Runtime": "nodejs12.x",
+            "Role": "arn:aws:iam::669453403305:role/amplify-login-lambda-80c9d7a7",
+            "Handler": "index.handler",
+            "CodeSize": 575,
+            "Description": "",
+            "Timeout": 15,
+            "MemorySize": 256,
+            "LastModified": "2020-12-10T15:42:59.920+0000",
+            "CodeSha256": "9WluWAT1dqmw6xJPiaGGcy67U0x1MReSyKZ1XR2pMHw=",
+            "Version": "$LATEST",
+            "TracingConfig": {
+                "Mode": "PassThrough"
+            },
+            "RevisionId": "7c68f172-d72d-4878-a01c-673ba25e7db3",
+            "PackageType": "Zip"
+        },
+        {
+            "FunctionName": "config_key_rotation",
+            "FunctionArn": "arn:aws:lambda:eu-central-1:669453403305:function:config_key_rotation",
+            "Runtime": "nodejs12.x",
+            "Role": "arn:aws:iam::669453403305:role/iam_config_key_rotation_lambda",
+            "Handler": "index.handler",
+            "CodeSize": 840344,
+            "Description": "Config Rule check unused keys, notify and deactivate",
+            "Timeout": 60,
+            "MemorySize": 1024,
+            "LastModified": "2020-03-17T16:06:22.022+0000",
+            "CodeSha256": "PBVgFofj6qnLNHGXrFOQulSNCUxAh+WYVwwZMpJwfOc=",
+            "Version": "$LATEST",
+            "Environment": {
+                "Variables": {
+                    "foo": "bar"
+                }
+            },
+            "TracingConfig": {
+                "Mode": "PassThrough"
+            },
+            "RevisionId": "37fdb5ad-404d-4b83-b7d1-7cd32745ce65",
+            "PackageType": "Zip"
+        },
+        {
+            "FunctionName": "cwsyn-awsblog-broken-links-50941269-c5f3-438b-a4ea-0f8df3ea2f28",
+            "FunctionArn": "arn:aws:lambda:eu-central-1:669453403305:function:cwsyn-awsblog-broken-links-50941269-c5f3-438b-a4ea-0f8df3ea2f28",
+            "Runtime": "nodejs10.x",
+            "Role": "arn:aws:iam::669453403305:role/service-role/CloudWatchSyntheticsRole-awsblog-broken-links-95e-3f4aee539c15",
+            "Handler": "index.handler",
+            "CodeSize": 1015,
+            "Description": "",
+            "Timeout": 900,
+            "MemorySize": 1000,
+            "LastModified": "2020-02-26T21:43:36.402+0000",
+            "CodeSha256": "PlhNjBXHoUTbGMomMGgQSsVYFfjED/+3b+gf8VlQT+Y=",
+            "Version": "$LATEST",
+            "TracingConfig": {
+                "Mode": "PassThrough"
+            },
+            "RevisionId": "aae4b105-1d0b-4d91-93c9-9319f45a3655",
+            "Layers": [
+                {
+                    "Arn": "arn:aws:lambda:eu-central-1:122305336817:layer:Synthetics:2",
+                    "CodeSize": 43345533
+                },
+                {
+                    "Arn": "arn:aws:lambda:eu-central-1:669453403305:layer:cwsyn-awsblog-broken-links-50941269-c5f3-438b-a4ea-0f8df3ea2f28:1",
+                    "CodeSize": 3743
+                }
+            ],
+            "PackageType": "Zip"
+        },
+        {
+            "FunctionName": "demoConfigRule",
+            "FunctionArn": "arn:aws:lambda:eu-central-1:669453403305:function:demoConfigRule",
+            "Runtime": "nodejs12.x",
+            "Role": "arn:aws:iam::669453403305:role/service-role/democonfig",
+            "Handler": "index.handler",
+            "CodeSize": 1274,
+            "Description": "An AWS Config rule that is triggered periodically. Checks for a maximum number of resources in your account.",
+            "Timeout": 10,
+            "MemorySize": 128,
+            "LastModified": "2020-01-22T12:28:27.997+0000",
+            "CodeSha256": "PFwZz0woGe8oN//s79m3TtL0HPldcAAyKFcEGtzzwqw=",
+            "Version": "$LATEST",
+            "TracingConfig": {
+                "Mode": "PassThrough"
+            },
+            "RevisionId": "d62ac19e-4546-445f-a70f-2e203a34ca15",
+            "PackageType": "Zip"
+        },
+        {
+            "FunctionName": "StackSet-tr-accountsetup-c-LambdaSetPasswordPolicy-1GKLK6HYU1AYB",
+            "FunctionArn": "arn:aws:lambda:eu-central-1:669453403305:function:StackSet-tr-accountsetup-c-LambdaSetPasswordPolicy-1GKLK6HYU1AYB",
+            "Runtime": "nodejs12.x",
+            "Role": "arn:aws:iam::669453403305:role/StackSet-tr-accountsetup-ServiceRoleLambdaExecuti-PPNNV9GVD345",
+            "Handler": "index.handler",
+            "CodeSize": 1453,
+            "Description": "",
+            "Timeout": 100,
+            "MemorySize": 128,
+            "LastModified": "2020-01-13T07:51:32.447+0000",
+            "CodeSha256": "ZMTH3o/tybORzGmNVN6yjqlJBp7fZSvoFFXy6ga9go0=",
+            "Version": "$LATEST",
+            "VpcConfig": {
+                "SubnetIds": [],
+                "SecurityGroupIds": [],
+                "VpcId": ""
+            },
+            "TracingConfig": {
+                "Mode": "PassThrough"
+            },
+            "RevisionId": "e9f3c332-e733-4965-a3c3-e66816fe7c24",
+            "PackageType": "Zip"
+        },
+        {
+            "FunctionName": "amplify-login-create-auth-challenge-80c9d7a7",
+            "FunctionArn": "arn:aws:lambda:eu-central-1:669453403305:function:amplify-login-create-auth-challenge-80c9d7a7",
+            "Runtime": "nodejs12.x",
+            "Role": "arn:aws:iam::669453403305:role/amplify-login-lambda-80c9d7a7",
+            "Handler": "index.handler",
+            "CodeSize": 290,
+            "Description": "",
+            "Timeout": 15,
+            "MemorySize": 256,
+            "LastModified": "2020-12-10T15:42:59.970+0000",
+            "CodeSha256": "+Qhbe0/f+yeeYPkLjWX8lXmi83PbwOdxOlRFRT2+AxA=",
+            "Version": "$LATEST",
+            "TracingConfig": {
+                "Mode": "PassThrough"
+            },
+            "RevisionId": "89b9f4d6-29cf-4e7d-89f0-8492cc6eac3b",
+            "PackageType": "Zip"
+        },
+        {
+            "FunctionName": "ConfigRuleStack-checkDescription10AC60B4-5Y2PTFECP2LW",
+            "FunctionArn": "arn:aws:lambda:eu-central-1:669453403305:function:ConfigRuleStack-checkDescription10AC60B4-5Y2PTFECP2LW",
+            "Runtime": "python3.7",
+            "Role": "arn:aws:iam::669453403305:role/ConfigRuleStack-checkDescriptionServiceRoleD1448C9-9IX91XK5MJ5N",
+            "Handler": "ec2_security_group_description.lambda_handler",
+            "CodeSize": 10166152,
+            "Description": "",
+            "Timeout": 3,
+            "MemorySize": 1024,
+            "LastModified": "2019-12-12T22:55:10.702+0000",
+            "CodeSha256": "wVkuZqKPgp5iSke6B4D7pLS3QX7yGxMeR5kPLin/3ns=",
+            "Version": "$LATEST",
+            "VpcConfig": {
+                "SubnetIds": [],
+                "SecurityGroupIds": [],
+                "VpcId": ""
+            },
+            "TracingConfig": {
+                "Mode": "PassThrough"
+            },
+            "RevisionId": "80a7d27a-9278-4363-84c4-f58f6d465e0e",
+            "PackageType": "Zip"
+        },
+        {
+            "FunctionName": "litexa_state_development_litexa_handler",
+            "FunctionArn": "arn:aws:lambda:eu-central-1:669453403305:function:litexa_state_development_litexa_handler",
+            "Runtime": "nodejs8.10",
+            "Role": "arn:aws:iam::669453403305:role/litexa_handler_lambda",
+            "Handler": "index.handler",
+            "CodeSize": 10826944,
+            "Description": "Litexa skill handler for project litexa_state",
+            "Timeout": 10,
+            "MemorySize": 1024,
+            "LastModified": "2020-01-06T11:00:04.924+0000",
+            "CodeSha256": "R0WWCxRO3f83CgfBIsQdR08zIPttzg7mk5L8gFZ/u3Q=",
+            "Version": "$LATEST",
+            "Environment": {
+                "Variables": {
+                    "dynamoTableName": "litexa_state_development_litexa_handler_state",
+                    "variant": "development",
+                    "assetsRoot": "https://s3.eu-central-1.amazonaws.com/litexa-stagingbucket-j455n3mlvnhc/litexa_state/development/",
+                    "loggingLevel": "terse"
+                }
+            },
+            "TracingConfig": {
+                "Mode": "PassThrough"
+            },
+            "RevisionId": "4e1f4405-6d6b-4ab2-b529-4585a1139d5a",
+            "PackageType": "Zip"
+        },
+        {
+            "FunctionName": "delete_orphans",
+            "FunctionArn": "arn:aws:lambda:eu-central-1:669453403305:function:delete_orphans",
+            "Runtime": "python2.7",
+            "Role": "arn:aws:iam::669453403305:role/service-role/delete_orphans-role-x8znf11f",
+            "Handler": "lambda_function.lambda_handler",
+            "CodeSize": 1812,
+            "Description": "Delete orphaned CW Logs",
+            "Timeout": 68,
+            "MemorySize": 1024,
+            "LastModified": "2019-06-14T07:54:03.994+0000",
+            "CodeSha256": "kEbDxXW4omrdrhteCZ9Sznlj93R/xlfhdnn6mdDpdtk=",
+            "Version": "$LATEST",
+            "VpcConfig": {
+                "SubnetIds": [],
+                "SecurityGroupIds": [],
+                "VpcId": ""
+            },
+            "TracingConfig": {
+                "Mode": "PassThrough"
+            },
+            "RevisionId": "51a690cd-243e-4684-bf4b-fe224e6b0d5d",
+            "PackageType": "Zip"
+        },
+        {
+            "FunctionName": "InstanceScheduler-InstanceSchedulerMain",
+            "FunctionArn": "arn:aws:lambda:eu-central-1:669453403305:function:InstanceScheduler-InstanceSchedulerMain",
+            "Runtime": "python3.7",
+            "Role": "arn:aws:iam::669453403305:role/InstanceScheduler-SchedulerRole-1T7Y4AK1EX97M",
+            "Handler": "main.lambda_handler",
+            "CodeSize": 1897526,
+            "Description": "EC2 and RDS instance scheduler, version v1.3.3",
+            "Timeout": 300,
+            "MemorySize": 1024,
+            "LastModified": "2020-11-18T18:22:04.526+0000",
+            "CodeSha256": "9qHAYM6qC2v+9vdzfdgg2Hn64XITBfAZJRyhwyaee/M=",
+            "Version": "$LATEST",
+            "Environment": {
+                "Variables": {
+                    "TRACE": "True",
+                    "SOLUTION_ID": "S00030",
+                    "CONFIG_TABLE": "InstanceScheduler-ConfigTable-1NQ7QK1888FR5",
+                    "USER_AGENT": "InstanceScheduler-InstanceScheduler-v1.3.3",
+                    "STATE_TABLE": "InstanceScheduler-StateTable-PDJIMX1HPPJZ",
+                    "BOTO_RETRY": "5,10,30,0.25",
+                    "MAINTENANCE_WINDOW_TABLE": "InstanceScheduler-MaintenanceWindowTable-1DDOQPVVVD52Z",
+                    "STACK_NAME": "InstanceScheduler",
+                    "TAG_NAME": "Schedule",
+                    "METRICS_URL": "https://metrics.awssolutionsbuilder.com/generic",
+                    "ACCOUNT": "669453403305",
+                    "SEND_METRICS": "False",
+                    "ISSUES_TOPIC_ARN": "arn:aws:sns:eu-central-1:669453403305:InstanceScheduler-InstanceSchedulerSnsTopic-JJ9RDZXAMPZR",
+                    "LOG_GROUP": "InstanceScheduler-logs",
+                    "DDB_TABLE_NAME": "InstanceScheduler-StateTable-PDJIMX1HPPJZ",
+                    "SCHEDULER_FREQUENCY": "10",
+                    "ENV_BOTO_RETRY_LOGGING": "FALSE",
+                    "SCHEDULER_RULE": "aws-instance-schedulerscheduling_rule"
+                }
+            },
+            "TracingConfig": {
+                "Mode": "PassThrough"
+            },
+            "RevisionId": "9aec58b3-2ba7-443d-a1c1-6e7c70d36350",
+            "PackageType": "Zip"
+        },
+        {
+            "FunctionName": "demoConfigChangeTriggered",
+            "FunctionArn": "arn:aws:lambda:eu-central-1:669453403305:function:demoConfigChangeTriggered",
+            "Runtime": "nodejs12.x",
+            "Role": "arn:aws:iam::669453403305:role/service-role/demoConfigChangeTriggered-role-106bvg8k",
+            "Handler": "index.handler",
+            "CodeSize": 1894,
+            "Description": "An AWS Config rule that is triggered by configuration changes to EC2 instances. Checks instance types.",
+            "Timeout": 10,
+            "MemorySize": 128,
+            "LastModified": "2020-06-18T12:29:50.483+0000",
+            "CodeSha256": "XCNxkELCC0R5Cs3k0ASGrIu+f2rQEILsE69UKVHvzd4=",
+            "Version": "$LATEST",
+            "TracingConfig": {
+                "Mode": "PassThrough"
+            },
+            "RevisionId": "3fd48f1a-1265-44dd-a369-0b9f934dd405",
+            "PackageType": "Zip"
+        },
+        {
+            "FunctionName": "dumpEvent",
+            "FunctionArn": "arn:aws:lambda:eu-central-1:669453403305:function:dumpEvent",
+            "Runtime": "nodejs10.x",
+            "Role": "arn:aws:iam::669453403305:role/service-role/dumpEventRole",
+            "Handler": "index.handler",
+            "CodeSize": 261,
+            "Description": "",
+            "Timeout": 3,
+            "MemorySize": 1024,
+            "LastModified": "2020-04-22T11:12:25.053+0000",
+            "CodeSha256": "Do/9zmPENSFizGn8JVAc8bp3sI3Cnq+Bv0wLa5UPy4o=",
+            "Version": "$LATEST",
+            "VpcConfig": {
+                "SubnetIds": [],
+                "SecurityGroupIds": [],
+                "VpcId": ""
+            },
+            "TracingConfig": {
+                "Mode": "PassThrough"
+            },
+            "RevisionId": "98d1e262-e0bc-43e5-8249-6d158137eb49",
+            "PackageType": "Zip"
+        }
+    ]
+}

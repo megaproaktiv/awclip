@@ -12,6 +12,7 @@ import (
 )
 
 const FirstRegion = "eu-north-1"
+const DefaultRegion = "us-west-1"
 
 //go:generate moq -out ec2_moq_test.go . Ec2Interface
 type Ec2Interface interface {
@@ -43,7 +44,7 @@ var Ec2DescribeRegionsParameter = &awclip.Parameters{
 
 func Ec2DescribeInstancesProxy(entry *awclip.CacheEntry) *string {
 
-	if debug {
+	if Debug {
 		fmt.Println("Ec2DescribeInstancesProxy - Start : ", *entry.Parameters.Region)
 	}
 
@@ -83,14 +84,14 @@ func Ec2DescribeInstancesProxy(entry *awclip.CacheEntry) *string {
 		}
 	}
 	content += "\n"
-	if debug {
+	if Debug {
 		fmt.Println("Ec2DescribeInstancesProxy - End : ", *entry.Parameters.Region)
 	}
 	return &content
 }
 
 func Ec2DescribeRegionsProxy(newCacheEntry *awclip.CacheEntry) *string {
-	if debug {
+	if Debug {
 		fmt.Println("Start describe regions")
 	}
 
@@ -123,7 +124,7 @@ func Ec2DescribeRegionsProxy(newCacheEntry *awclip.CacheEntry) *string {
 	// Content for --query_Reservations[*].Instances[*].[InstanceId]
 	content := ""
 
-	length := len(response.Regions)
+	length := len(response.Regions)-1
 	for i, v := range response.Regions {
 		content = content + *v.RegionName
 		if i < length {

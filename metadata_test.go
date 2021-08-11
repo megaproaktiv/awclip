@@ -2,12 +2,12 @@ package awclip_test
 
 import (
 	"testing"
-
-	"gotest.tools/assert"
+	"time"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/megaproaktiv/awclip"
 	"github.com/megaproaktiv/awclip/services"
+	"gotest.tools/assert"
 )
 
 func TestArgumentsToCachedEntry(t *testing.T) {
@@ -17,46 +17,46 @@ func TestArgumentsToCachedEntry(t *testing.T) {
 	}
 	newCacheEntry1 := &awclip.CacheEntry{
 		Parameters: awclip.Parameters{
-			Service: new(string),
-			Action:  new(string),
-			Output:  new(string),
-			Region:  new(string),
-			Profile: new(string),
-			Parameters: map[string]*string{},
-			Query:   new(string),
+			Service:    new(string),
+			Action:     new(string),
+			Output:     new(string),
+			Region:     new(string),
+			Profile:    new(string),
+			AdditionalParameters: map[string]*string{},
+			Query:      new(string),
 		},
 	}
 	newCacheEntry2 := &awclip.CacheEntry{
 		Parameters: awclip.Parameters{
-			Service: new(string),
-			Action:  new(string),
-			Output:  new(string),
-			Region:  new(string),
-			Profile: new(string),
-			Parameters: map[string]*string{},
-			Query:   new(string),
+			Service:    new(string),
+			Action:     new(string),
+			Output:     new(string),
+			Region:     new(string),
+			Profile:    new(string),
+			AdditionalParameters: map[string]*string{},
+			Query:      new(string),
 		},
 	}
 	newCacheEntry3 := &awclip.CacheEntry{
 		Parameters: awclip.Parameters{
-			Service: new(string),
-			Action:  new(string),
-			Output:  new(string),
-			Region:  new(string),
-			Profile: new(string),
-			Parameters: map[string]*string{},
-			Query:   new(string),
+			Service:    new(string),
+			Action:     new(string),
+			Output:     new(string),
+			Region:     new(string),
+			Profile:    new(string),
+			AdditionalParameters: map[string]*string{},
+			Query:      new(string),
 		},
 	}
 	newCacheEntry4 := &awclip.CacheEntry{
 		Parameters: awclip.Parameters{
-			Service: new(string),
-			Action:  new(string),
-			Output:  new(string),
-			Region:  new(string),
-			Profile: new(string),
-			Parameters: map[string]*string{},
-			Query:   new(string),
+			Service:    new(string),
+			Action:     new(string),
+			Output:     new(string),
+			Region:     new(string),
+			Profile:    new(string),
+			AdditionalParameters: map[string]*string{},
+			Query:      new(string),
 		},
 	}
 
@@ -84,13 +84,13 @@ func TestArgumentsToCachedEntry(t *testing.T) {
 				item: newCacheEntry1,
 			},
 			want: &awclip.Parameters{
-				Service: aws.String("ec2"),
-				Action:  aws.String("describe-instances"),
-				Output:  aws.String("text"),
-				Region:  aws.String("eu-central-1"),
-				Profile: aws.String("myprofile"),
-				Parameters: map[string]*string{},
-				Query:   aws.String("Reservations[*].Instances[*].[InstanceId]"),
+				Service:    aws.String("ec2"),
+				Action:     aws.String("describe-instances"),
+				Output:     aws.String("text"),
+				Region:     aws.String("eu-central-1"),
+				Profile:    aws.String("myprofile"),
+				AdditionalParameters: map[string]*string{},
+				Query:      aws.String("Reservations[*].Instances[*].[InstanceId]"),
 			},
 		},
 		{
@@ -112,13 +112,13 @@ func TestArgumentsToCachedEntry(t *testing.T) {
 				item: newCacheEntry2,
 			},
 			want: &awclip.Parameters{
-				Service: aws.String("ec2"),
-				Action:  aws.String("describe-regions"),
-				Output:  aws.String("text"),
-				Region:  aws.String("eu-central-1"),
-				Profile: aws.String("helmut"),
-				Parameters: map[string]*string{},
-				Query:   aws.String("Regions[].RegionName"),
+				Service:    aws.String("ec2"),
+				Action:     aws.String("describe-regions"),
+				Output:     aws.String("text"),
+				Region:     aws.String("eu-central-1"),
+				Profile:    aws.String("helmut"),
+				AdditionalParameters: map[string]*string{},
+				Query:      aws.String("Regions[].RegionName"),
 			},
 		},
 		{
@@ -146,7 +146,7 @@ func TestArgumentsToCachedEntry(t *testing.T) {
 				Region:     aws.String("eu-central-1"),
 				Profile:    aws.String("helmut"),
 				Query:      aws.String(""),
-				Parameters: map[string]*string{"user-name": aws.String("johndonkey")},
+				AdditionalParameters: map[string]*string{"user-name": aws.String("johndonkey")},
 			},
 		},
 		{
@@ -174,7 +174,7 @@ func TestArgumentsToCachedEntry(t *testing.T) {
 				Region:     aws.String("eu-central-1"),
 				Profile:    aws.String("helmut"),
 				Query:      aws.String(""),
-				Parameters: map[string]*string{"user-name": aws.String("johndonkey")},
+				AdditionalParameters: map[string]*string{"user-name": aws.String("johndonkey")},
 			},
 		},
 	}
@@ -182,13 +182,12 @@ func TestArgumentsToCachedEntry(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Log(tt.name)
-			tt.args.item.ArgumentsToCachedEntry(tt.args.args)
+			tt.args.item.Parameters.ArgumentsToCachedEntry(tt.args.args)
 			assert.DeepEqual(t, tt.args.item.Parameters, *tt.want)
 
 		})
 	}
 }
-
 
 func TestAlmostEqualWithParameters(t *testing.T) {
 
@@ -199,10 +198,77 @@ func TestAlmostEqualWithParameters(t *testing.T) {
 		Region:     aws.String("eu-central-1"),
 		Profile:    aws.String("helmut"),
 		Query:      aws.String(""),
-		Parameters: map[string]*string{"user-name": aws.String("johndonkey")},
+		AdditionalParameters: map[string]*string{"user-name": aws.String("johndonkey")},
 	}
 
-
 	ok := newParms.AlmostEqualWithParameters(services.IamListAttachedUserPoliciesParameter)
-	assert.Equal(t,true, ok ,"IamListAttachedUserPoliciesParameter should be matched")
+	assert.Equal(t, true, ok, "IamListAttachedUserPoliciesParameter should be matched")
+}
+
+func TestCacheEntry_ArgumentsToCachedEntry(t *testing.T) {
+	type fields struct {
+		Id            *string
+		Cmd           *string
+		Created       time.Time
+		LastAccessed  time.Time
+		AccessCounter int
+		Parameters    awclip.Parameters
+		Provider      string
+	}
+	type args struct {
+		args []string
+	}
+	tests := []struct {
+		name   string
+		fields fields
+		args   args
+	}{
+		// TODO: Add test cases.
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			metadata := &awclip.CacheEntry{
+				Id:            tt.fields.Id,
+				Cmd:           tt.fields.Cmd,
+				Created:       tt.fields.Created,
+				LastAccessed:  tt.fields.LastAccessed,
+				AccessCounter: tt.fields.AccessCounter,
+				Parameters:    tt.fields.Parameters,
+				Provider:      tt.fields.Provider,
+			}
+			metadata.Parameters.ArgumentsToCachedEntry(tt.args.args)
+		})
+	}
+}
+
+
+// Test for error:
+// dist/awclip ec2 describe-regions --query "Regions[].RegionName" --output text --profile ggtrcadmin --region eu-central-1 --region-names
+// panic: assignment to entry in nil map
+
+// goroutine 1 [running]:
+// github.com/megaproaktiv/awclip.(*CacheEntry).ArgumentsToCachedEntry(0xc00012be58, 0xc0000200c0, 0xc, 0xc)
+// 	/Users/silberkopf/letsbuild/awclip/metadata.go:154 +0x3ee
+// main.main()
+// 	/Users/silberkopf/letsbuild/awclip/main/main.go:31 +0x11d
+// Prowler adds "--region-names" to aws cli ?
+func TestArgumentsToCachedEntryRegionsnames(t *testing.T){
+	metadata := &awclip.CacheEntry{}
+	var args =  []string{
+		"dist/awclip",
+		"ec2",
+		"list-attached-user-policies",
+		"--profile",
+		"helmut",
+		"--query",
+		"Regions[].RegionName",
+		"--region",
+		"eu-central-1",
+		"--output",
+		"text",
+		"--region-names",
+	}
+
+	metadata.Parameters.ArgumentsToCachedEntry(args)
+	assert.Equal(t , "eu-central-1", *metadata.Parameters.Region)
 }
