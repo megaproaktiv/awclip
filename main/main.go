@@ -32,6 +32,7 @@ func main() {
 		Id: id,
 		Cmd: parameters.CommandLine(),
 		Parameters: parameters,
+		Provider: "awscli",
 	}
 	
 	
@@ -97,9 +98,8 @@ func main() {
 		}
 		
 		// no actions in go => use python cli
-		if newCacheEntry.Provider == "tbd" {
+		if newCacheEntry.Provider == "awscli" {
 			// just python aws cli
-			newCacheEntry.Provider = "python"
 			stdout, err := cmd.Output()
 			if err != nil {
 				log.Print(err.Error())
