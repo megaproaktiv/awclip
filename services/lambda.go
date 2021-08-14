@@ -2,16 +2,18 @@ package services
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"log"
 	"os"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
-	gomiddleware "github.com/aws/aws-sdk-go-v2/aws/middleware"
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/lambda"
 	"github.com/aws/smithy-go/middleware"
+	"github.com/jmespath/go-jmespath"
 
 	// smithy "github.com/aws/smithy-go"
 	smithyio "github.com/aws/smithy-go/io"
@@ -40,6 +42,7 @@ var LambdaListFunctionsParameter = &awclip.Parameters{
 
 func LambdaListFunctionsProxy(llfpm *awclip.CacheEntry) *string{
 
+	//(base call)
 	if Debug {
 		fmt.Println("lambda:35 Region:", *llfpm.Parameters.Region)
 		fmt.Println("lambda:36 *:", llfpm)
@@ -48,30 +51,39 @@ func LambdaListFunctionsProxy(llfpm *awclip.CacheEntry) *string{
 	llfpm.Provider = "go"
 	var err error
 	client := ProfiledLambdaClient(llfpm)
-	var response *lambda.ListFunctionsOutput
+	//var response *lambda.ListFunctionsOutput
 	parms := &lambda.ListFunctionsInput{}
 	if( Debug){
 		fmt.Println("lambda line 39 Region:", *llfpm.Parameters.Region)
 	}
 
 	if len(*llfpm.Parameters.Region) > 4 {
-		response, err = client.ListFunctions(context.TODO(), parms, func(o *lambda.Options) {
+		_, err = client.ListFunctions(context.TODO(), parms, func(o *lambda.Options) {
 			o.Region = *llfpm.Parameters.Region
 		})
 	} else {
-		response, err = client.ListFunctions(context.TODO(), parms)
+		_, err = client.ListFunctions(context.TODO(), parms)
 	}
 	if err != nil {
 		log.Println("Cant connect to lambda service")
 		log.Println("Region:", *llfpm.Parameters.Region)
 		log.Fatal(err)
 	}
-	content := ""
-	
-	for _, v := range response.Functions {
-		content = content + *v.FunctionName + TAB + string(v.Runtime)+NL
-	}
 
+	// Query
+	prefetchName := ApiCallDumpFileNameString(llfpm.Parameters.Service,llfpm.Parameters.Action,llfpm.Parameters.Region)
+	jsondata, err := ioutil.ReadFile(*prefetchName)
+    check(err)
+    var data interface{}
+	_ = json.Unmarshal(jsondata, &data)
+	result, _ := jmespath.Search("Functions[*].{R:Runtime,F:FunctionName}", data)
+	
+	// to text
+	content := ""
+	for _,item:=range result.([]interface{}) {
+		thisMap := item.(map[string]interface{})
+		content += fmt.Sprintf("%v\t%v\n",thisMap["F"],thisMap["R"])
+	}
 	
 	return &content
 }
@@ -108,27 +120,47 @@ var handleDeserialize = middleware.DeserializeMiddlewareFunc("dumpjson", func(
 	// 	return out, metadata, &smithy.DeserializationError{Err: fmt.Errorf("unknown transport type %T", out.RawResponse)}
 	// }
 	
-	fmt.Printf("%T\n",response.Body)
-	fmt.Printf("%v\n",response.Body)
+	// fmt.Printf("%T\n",response.Body)
+	// fmt.Printf("%v\n",response.Body)
 	var buff [1024]byte
 	ringBuffer := smithyio.NewRingBuffer(buff[:])
 
 	body := io.TeeReader(response.Body, ringBuffer)
 	// check errors
-	serviceId := gomiddleware.GetServiceID(ctx)
-	operationName := gomiddleware.GetOperationName(ctx)
-	region := gomiddleware.GetRegion(ctx)
+
 	
-	file, err := os.Create(awclip.DATADIR+"/"+serviceId+"-"+operationName+"-"+region+".json")
+	prefetchName := ApiCallDumpFileNameCtx(ctx)
+
+	file, err := os.Create(*prefetchName)
     if err != nil {
 		log.Fatal(err)
     }
-	defer file.Close()
 	_, err = io.Copy(file, body)
+	
+	defer file.Close()
+	
+	// jsondata, err := ioutil.ReadFile(*prefetchName)
+    // check(err)
+    // var data interface{}
+	// err = json.Unmarshal(jsondata, &data)
+	// result, err := jmespath.Search("Functions[*].{R:Runtime,F:FunctionName}", data)
+	// // result, err := jmespath.Search("Functions[*].{R:Runtime,N:FunctionName}", data)
 
+	// fmt.Println("---")
+	// for _,item:=range result.([]interface{}) {
+	// 	thisMap := item.(map[string]interface{})
+	// 	fmt.Printf("%v\t%v\n",thisMap["F"],thisMap["R"])
+	// }
+	// fmt.Println("---")
+	
 	// Middleware must call the next middleware to be executed in order to continue execution of the stack.
 	// If an error occurs, you can return to prevent further execution.
 	return next.HandleDeserialize(ctx, in)
 })
 
+func check(e error) {
+    if e != nil {
+        panic(e)
+    }
+}
 	

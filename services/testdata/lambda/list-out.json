@@ -1,0 +1,82 @@
+[
+    {
+        "R": "nodejs8.10",
+        "N": "ask-custom-messeguide-default"
+    },
+    {
+        "R": "nodejs12.x",
+        "N": "amplify-login-custom-message-80c9d7a7"
+    },
+    {
+        "R": "nodejs14.x",
+        "N": "Demo2"
+    },
+    {
+        "R": "nodejs12.x",
+        "N": "UpdateSecuritySubAccounts"
+    },
+    {
+        "R": "java11",
+        "N": "demo2"
+    },
+    {
+        "R": "nodejs12.x",
+        "N": "demo"
+    },
+    {
+        "R": "nodejs12.x",
+        "N": "amplify-login-verify-auth-challenge-80c9d7a7"
+    },
+    {
+        "R": "nodejs12.x",
+        "N": "Demo"
+    },
+    {
+        "R": "nodejs12.x",
+        "N": "amplify-login-define-auth-challenge-80c9d7a7"
+    },
+    {
+        "R": "nodejs12.x",
+        "N": "config_key_rotation"
+    },
+    {
+        "R": "nodejs10.x",
+        "N": "cwsyn-awsblog-broken-links-50941269-c5f3-438b-a4ea-0f8df3ea2f28"
+    },
+    {
+        "R": "nodejs12.x",
+        "N": "demoConfigRule"
+    },
+    {
+        "R": "nodejs12.x",
+        "N": "StackSet-tr-accountsetup-c-LambdaSetPasswordPolicy-1GKLK6HYU1AYB"
+    },
+    {
+        "R": "nodejs12.x",
+        "N": "amplify-login-create-auth-challenge-80c9d7a7"
+    },
+    {
+        "R": "python3.7",
+        "N": "ConfigRuleStack-checkDescription10AC60B4-5Y2PTFECP2LW"
+    },
+    {
+        "R": "nodejs8.10",
+        "N": "litexa_state_development_litexa_handler"
+    },
+    {
+        "R": "python2.7",
+        "N": "delete_orphans"
+    },
+    {
+        "R": "python3.7",
+        "N": "InstanceScheduler-InstanceSchedulerMain"
+    },
+    {
+        "R": "nodejs12.x",
+        "N": "demoConfigChangeTriggered"
+    },
+    {
+        "R": "nodejs10.x",
+        "N": "dumpEvent"
+    }
+]
