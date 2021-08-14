@@ -6,7 +6,7 @@ import (
 	"unicode"
 )
 
-const tmpdir = ".awclip"
+const DATADIR = ".awclip"
 const debug = false
 
 func SpaceStringsBuilder(str string) string {
@@ -36,11 +36,11 @@ func CacheHit(id *string) bool {
 }
 
 func GetLocationData(contentId *string) *string {
-	location := tmpdir + string(os.PathSeparator) + *contentId + ".json"
+	location := DATADIR + string(os.PathSeparator) + *contentId + ".json"
 	return &location
 }
 func GetLocationMetaData(contentId *string) *string {
-	location := tmpdir + string(os.PathSeparator) + *contentId + "-db.json"
+	location := DATADIR + string(os.PathSeparator) + *contentId + "-db.json"
 	return &location
 }
 
