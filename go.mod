@@ -14,5 +14,6 @@ require (
 	github.com/jmespath/go-jmespath v0.4.0 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pquerna/ffjson v0.0.0-20190930134022-aa0246cd15f7 // indirect
+	github.com/stretchr/testify v1.7.0 // indirect
 	gotest.tools v2.2.0+incompatible
 )

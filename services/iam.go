@@ -6,7 +6,6 @@ import (
 	"log"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
-	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/iam"
 	"github.com/megaproaktiv/awclip"
 )
@@ -54,15 +53,13 @@ var IamListAttachedUserPoliciesParameter = &awclip.Parameters{
 	Query:      aws.String(""),
 }
 
-func IamListUserPoliciesProxy(entry *awclip.CacheEntry) *string {
+func IamListUserPoliciesProxy(entry *awclip.CacheEntry, client IamInterface) *string {
 	if Debug {
 		fmt.Println("IamListUserPoliciesProxy - Start : ", *entry.Parameters.Region)
 	}
 
 	entry.Provider = "go"
 	var err error
-	client := ProfiledIamClient(entry)
-
 	var response *iam.ListUserPoliciesOutput
 	iamParms := &iam.ListUserPoliciesInput{
 		UserName: entry.Parameters.AdditionalParameters["user-name"],
@@ -89,10 +86,10 @@ func IamListUserPoliciesProxy(entry *awclip.CacheEntry) *string {
 	return &content
 }
 
-func IamListUserProxy(entry *awclip.CacheEntry) *string {
+func IamListUserProxy(entry *awclip.CacheEntry,  client IamInterface) *string {
 	entry.Provider = "go"
 	var err error
-	client := ProfiledIamClient(entry)
+	
 	var response  *iam.ListUsersOutput 
 	iamParams := &iam.ListUsersInput{}
 	if len(*entry.Parameters.Region) > 4 {
@@ -125,10 +122,10 @@ func IamListUserProxy(entry *awclip.CacheEntry) *string {
 
 }
 
-func IamListAttachedUserPoliciesProxy(entry *awclip.CacheEntry) *string {
+func IamListAttachedUserPoliciesProxy(entry *awclip.CacheEntry, client IamInterface) *string {
 	entry.Provider = "go"
 	var err error
-	client := ProfiledIamClient(entry)
+	
 
 	var response *iam.ListAttachedUserPoliciesOutput
 	iamParms := &iam.ListAttachedUserPoliciesInput{
@@ -158,15 +155,3 @@ func IamListAttachedUserPoliciesProxy(entry *awclip.CacheEntry) *string {
 	return &content
 }
 
-
-func ProfiledIamClient(entry *awclip.CacheEntry) *iam.Client{
-	cfg, err := config.LoadDefaultConfig(
-		context.TODO(),
-		// Specify the shared configuration profile to load.
-		config.WithSharedConfigProfile(*entry.Parameters.Profile),
-	)
-	if err != nil {
-		panic("configuration error, " + err.Error())
-	}
-	return  iam.NewFromConfig(cfg)
-}

@@ -6,13 +6,13 @@ import (
 	"log"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
-	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/ec2"
 	"github.com/megaproaktiv/awclip"
 )
 
 const FirstRegion = "eu-north-1"
 const DefaultRegion = "us-west-1"
+
 
 //go:generate moq -out ec2_moq_test.go . Ec2Interface
 type Ec2Interface interface {
@@ -42,25 +42,16 @@ var Ec2DescribeRegionsParameter = &awclip.Parameters{
 	Query:   aws.String("Regions[].RegionName"),
 }
 
-func Ec2DescribeInstancesProxy(entry *awclip.CacheEntry) *string {
+func Ec2DescribeInstancesProxy(entry *awclip.CacheEntry, client Ec2Interface) *string {
 
 	if Debug {
 		fmt.Println("Ec2DescribeInstancesProxy - Start : ", *entry.Parameters.Region)
 	}
 
 	entry.Provider = "go"
-	cfg, err := config.LoadDefaultConfig(
-		context.TODO(),
-		// Specify the shared configuration profile to load.
-		config.WithSharedConfigProfile(*entry.Parameters.Profile),
-	)
-	if err != nil {
-		panic("configuration error, " + err.Error())
-	}
-	client := ec2.NewFromConfig(cfg)
-
+	
 	var response *ec2.DescribeInstancesOutput
-
+	var err error
 	if len(*entry.Parameters.Region) > 4 {
 		response, err = client.DescribeInstances(context.TODO(), nil, func(o *ec2.Options) {
 			o.Region = *entry.Parameters.Region
@@ -90,24 +81,16 @@ func Ec2DescribeInstancesProxy(entry *awclip.CacheEntry) *string {
 	return &content
 }
 
-func Ec2DescribeRegionsProxy(newCacheEntry *awclip.CacheEntry) *string {
+func Ec2DescribeRegionsProxy(newCacheEntry *awclip.CacheEntry, client Ec2Interface) *string {
 	if Debug {
 		fmt.Println("Start describe regions")
 	}
 
 	newCacheEntry.Provider = "go"
-	cfg, err := config.LoadDefaultConfig(
-		context.TODO(),
-		// Specify the shared configuration profile to load.
-		config.WithSharedConfigProfile(*newCacheEntry.Parameters.Profile),
-	)
-	if err != nil {
-		panic("configuration error, " + err.Error())
-	}
-	client := ec2.NewFromConfig(cfg)
+	
 
 	var response *ec2.DescribeRegionsOutput
-
+	var err error
 	if len(*newCacheEntry.Parameters.Region) > 4 {
 		response, err = client.DescribeRegions(context.TODO(), nil, func(o *ec2.Options) {
 			o.Region = *newCacheEntry.Parameters.Region

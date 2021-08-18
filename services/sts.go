@@ -6,7 +6,6 @@ import (
 	"log"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
-	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/sts"
 	"github.com/megaproaktiv/awclip"
 )
@@ -33,19 +32,12 @@ type GetCallerIdentity struct {
 	UserId  *string
 }
 
-func StsGetCallerIdentityProxy(newCacheEntry *awclip.CacheEntry) *string {
+func StsGetCallerIdentityProxy(newCacheEntry *awclip.CacheEntry, client StSInterface) *string {
 
 	newCacheEntry.Provider = "go"
-	cfg, err := config.LoadDefaultConfig(
-		context.TODO(),
-		config.WithSharedConfigProfile(*newCacheEntry.Parameters.Profile),
-	)
-	if err != nil {
-		panic("configuration error, " + err.Error())
-	}
-	client := sts.NewFromConfig(cfg)
-
+	
 	var response *sts.GetCallerIdentityOutput
+	var err error
 
 	if len(*newCacheEntry.Parameters.Region) > 4 {
 		response, err = client.GetCallerIdentity(context.TODO(), nil, func(o *sts.Options) {

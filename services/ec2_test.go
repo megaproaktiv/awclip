@@ -42,5 +42,5 @@ func TestEc2DescribeInstancesProxy(t *testing.T) {
 		},
 	}
 	content := services.Ec2DescribeInstancesProxy(config, mockedEc2Interface)
-	assert.Equal(t, "i-038834a1e9d61882a", *content)
+	assert.Equal(t, "i-038834a1e9d61882a\n", *content)
 }

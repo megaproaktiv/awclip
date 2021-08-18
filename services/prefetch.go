@@ -165,7 +165,7 @@ func replaceRegion(args []string, region string) []string {
 func calcInstances(wg *sync.WaitGroup, id *string, metadata *awclip.CacheEntry, client Ec2Interface) {
 	defer wg.Done()
 	
-	localContent := Ec2DescribeInstancesProxy(metadata)
+	localContent := Ec2DescribeInstancesProxy(metadata,client)
 	if Debug {
 		fmt.Println("Prefetch ec2 line 164  localContent: ", len(*localContent))
 	}
@@ -189,7 +189,7 @@ func calcFunctions(wg *sync.WaitGroup,  meta *awclip.CacheEntry, client LambdaIn
 		fmt.Println("prefetch Line 183 Region:", *meta.Parameters.Region)
 		fmt.Println("prefetch Line 187 metadata *:", meta)
 	}
-	localContent := LambdaListFunctionsProxy(meta)
+	localContent := LambdaListFunctionsProxy(meta, client)
 	if Debug {
 		fmt.Println("Prefetch:189 - localContent length lambda: ", len(*localContent))
 	}

@@ -1,0 +1,66 @@
+{
+    "Functions": [
+        {
+            "FunctionName": "s3encryptionrule-dev-s3check",
+            "FunctionArn": "arn:aws:lambda:eu-west-1:669453403305:function:s3encryptionrule-dev-s3check",
+            "Runtime": "nodejs6.10",
+            "Role": "arn:aws:iam::669453403305:role/s3encryptionrule-dev-eu-west-1-lambdaRole",
+            "Handler": "s3handler.handler",
+            "CodeSize": 6132221,
+            "Description": "",
+            "Timeout": 20,
+            "MemorySize": 1024,
+            "LastModified": "2017-08-02T09:13:36.617+0000",
+            "CodeSha256": "VS5BtDaHF5TTkl2lk5lDfEp4MQ8ahW085CFuNMDPElw=",
+            "Version": "$LATEST",
+            "TracingConfig": {
+                "Mode": "PassThrough"
+            },
+            "RevisionId": "b0b7501c-9a34-402e-87bb-8637a9995491",
+            "PackageType": "Zip"
+        },
+        {
+            "FunctionName": "amplify-login-define-auth-challenge-ac5a1a0a",
+            "FunctionArn": "arn:aws:lambda:eu-west-1:669453403305:function:amplify-login-define-auth-challenge-ac5a1a0a",
+            "Runtime": "nodejs12.x",
+            "Role": "arn:aws:iam::669453403305:role/amplify-login-lambda-ac5a1a0a",
+            "Handler": "index.handler",
+            "CodeSize": 575,
+            "Description": "",
+            "Timeout": 15,
+            "MemorySize": 256,
+            "LastModified": "2020-12-29T15:23:29.431+0000",
+            "CodeSha256": "JFFtB1qjPOv62pikldsMfpVvikeR3HZxcHSD2BJJ1AA=",
+            "Version": "$LATEST",
+            "TracingConfig": {
+                "Mode": "PassThrough"
+            },
+            "RevisionId": "c8131d72-ed46-48ad-b6e5-f851e284fee7",
+            "PackageType": "Zip"
+        },
+        {
+            "FunctionName": "amplify-login-verify-auth-challenge-ac5a1a0a",
+            "FunctionArn": "arn:aws:lambda:eu-west-1:669453403305:function:amplify-login-verify-auth-challenge-ac5a1a0a",
+            "Runtime": "nodejs12.x",
+            "Role": "arn:aws:iam::669453403305:role/amplify-login-lambda-ac5a1a0a",
+            "Handler": "index.handler",
+            "CodeSize": 6816646,
+            "Description": "",
+            "Timeout": 15,
+            "MemorySize": 256,
+            "LastModified": "2020-12-29T15:23:29.387+0000",
+            "CodeSha256": "rY6CmOem1KDWx9D5pQyXN0RudSMM0JRc/0DUNf9suJY=",
+            "Version": "$LATEST",
+            "Environment": {
+                "Variables": {
+                    "ENDPOINT": "https://16uofz95g4.execute-api.eu-west-1.amazonaws.com/prod"
+                }
+            },
+            "TracingConfig": {
+                "Mode": "PassThrough"
+            },
+            "RevisionId": "bececdc1-462b-419e-84ee-c4cd67372432",
+            "PackageType": "Zip"
+        }
+    ]
+}

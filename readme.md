@@ -11,7 +11,11 @@ If awclip binary is in /usr/local/bin:
 
 `alias aws='/usr/local/bin/awclip'`
 
+## Limits
 
+- No time to live implemented, delete `.awclip\*` for refresh
+- You have to specify region and output
+- Only one account, you have to clean `.awclip\*` for account switch
 ## Status
 
 Base functionality is working, no guarantee that it works on all services.
@@ -114,6 +118,9 @@ if you copy awclip into the same directory.
 ## Version 
 
 ### current
+  ## ADD
+  - jmespath query. Because map ordering is not guarenteed, a key array is needed. This also fixes the ordering bug of aws cli text python
+
 ### v0.1.8
   ## ADD
   - add iam list-users

@@ -2,7 +2,6 @@ package services
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -13,7 +12,6 @@ import (
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/lambda"
 	"github.com/aws/smithy-go/middleware"
-	"github.com/jmespath/go-jmespath"
 
 	// smithy "github.com/aws/smithy-go"
 	smithyio "github.com/aws/smithy-go/io"
@@ -21,6 +19,7 @@ import (
 
 	"github.com/megaproaktiv/awclip"
 )
+
 
 //go:generate moq -out lambda_moq_test.go . LambdaInterface
 
@@ -40,7 +39,7 @@ var LambdaListFunctionsParameter = &awclip.Parameters{
 	Query:      aws.String("Functions[*].{R:Runtime,N:FunctionName}"),
 }
 
-func LambdaListFunctionsProxy(llfpm *awclip.CacheEntry) *string{
+func LambdaListFunctionsProxy(llfpm *awclip.CacheEntry, client LambdaInterface) *string{
 
 	//(base call)
 	if Debug {
@@ -50,7 +49,6 @@ func LambdaListFunctionsProxy(llfpm *awclip.CacheEntry) *string{
 
 	llfpm.Provider = "go"
 	var err error
-	client := ProfiledLambdaClient(llfpm)
 	//var response *lambda.ListFunctionsOutput
 	parms := &lambda.ListFunctionsInput{}
 	if( Debug){
@@ -73,19 +71,14 @@ func LambdaListFunctionsProxy(llfpm *awclip.CacheEntry) *string{
 	// Query
 	prefetchName := ApiCallDumpFileNameString(llfpm.Parameters.Service,llfpm.Parameters.Action,llfpm.Parameters.Region)
 	jsondata, err := ioutil.ReadFile(*prefetchName)
-    check(err)
-    var data interface{}
-	_ = json.Unmarshal(jsondata, &data)
-	result, _ := jmespath.Search("Functions[*].{R:Runtime,F:FunctionName}", data)
-	
-	// to text
-	content := ""
-	for _,item:=range result.([]interface{}) {
-		thisMap := item.(map[string]interface{})
-		content += fmt.Sprintf("%v\t%v\n",thisMap["F"],thisMap["R"])
+	if err != nil {
+		panic("read error, " + err.Error())
 	}
+    data := string(jsondata)
+	// to text
+	content := awclip.QueryText(&data, llfpm.Parameters.Query)
 	
-	return &content
+	return content
 }
 
 func ProfiledLambdaClient(entry *awclip.CacheEntry) LambdaInterface{

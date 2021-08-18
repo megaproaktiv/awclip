@@ -1,11 +1,17 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"os"
 	"os/exec"
 
+	"github.com/aws/aws-sdk-go-v2/config"
+	"github.com/aws/aws-sdk-go-v2/service/ec2"
+	"github.com/aws/aws-sdk-go-v2/service/iam"
+	"github.com/aws/aws-sdk-go-v2/service/lambda"
+	"github.com/aws/aws-sdk-go-v2/service/sts"
 	"github.com/megaproaktiv/awclip"
 	"github.com/megaproaktiv/awclip/services"
 )
@@ -43,6 +49,7 @@ func main() {
 	}
 	cmd := exec.Command(prg, args[1:]...)
 
+	var rawContent *string
 	var content *string
 
 	discriminated := awclip.DiscriminatedCommand(&service,&action)
@@ -52,12 +59,24 @@ func main() {
 		
 	}
 
+	if services.RawCacheHit(metadata) && !discriminated{
+		services.CallManager(metadata)
+	}
+
+
 	//Miss => create entry
 	if awclip.CacheMiss(id) && !discriminated {
 		// fastproxy available?
 		newCacheEntry :=metadata
 		newParms := metadata.Parameters
-
+		cfg, err := config.LoadDefaultConfig(
+			context.TODO(),
+			// Specify the shared configuration profile to load.
+			config.WithSharedConfigProfile(*newParms.Profile),
+		)
+		if err != nil {
+			panic("configuration error, " + err.Error())
+		}
 		// CheckPrefetch
 		if ( *newCacheEntry.Parameters.Region == services.FirstRegion) {
 			if newParms.AlmostEqual(services.Ec2DescribeInstancesParameter ) {
@@ -70,31 +89,31 @@ func main() {
 
 		// Actions implemented in go
 		if newParms.AlmostEqual(services.Ec2DescribeInstancesParameter) {
-			content = services.Ec2DescribeInstancesProxy(newCacheEntry) 
+			rawContent = services.Ec2DescribeInstancesProxy(newCacheEntry,ec2.NewFromConfig(cfg)) 
 		} 
 		
 		if newParms.AlmostEqual(services.StsGetCallerIdentityParameter) {
-			content = services.StsGetCallerIdentityProxy(newCacheEntry)
+			rawContent = services.StsGetCallerIdentityProxy(newCacheEntry, sts.NewFromConfig(cfg))
 		} 
 		
 		if newParms.AlmostEqual(services.Ec2DescribeRegionsParameter) {
-			content = services.Ec2DescribeRegionsProxy(newCacheEntry)
+			rawContent = services.Ec2DescribeRegionsProxy(newCacheEntry,ec2.NewFromConfig(cfg))
 		} 
 
 		if newParms.AlmostEqualWithParameters(services.IamListUserPoliciesParameter){
-			content = services.IamListUserPoliciesProxy(newCacheEntry)
+			rawContent = services.IamListUserPoliciesProxy(newCacheEntry, iam.NewFromConfig(cfg))
 		}
 
 		if newParms.AlmostEqual((services.IamListUserParameter)){
-			content = services.IamListUserProxy(newCacheEntry)
+			rawContent = services.IamListUserProxy(newCacheEntry,iam.NewFromConfig(cfg))
 		}
 		
 		if newParms.AlmostEqualWithParameters(services.IamListAttachedUserPoliciesParameter){
-			content = services.IamListAttachedUserPoliciesProxy(newCacheEntry)
+			rawContent = services.IamListAttachedUserPoliciesProxy(newCacheEntry,iam.NewFromConfig(cfg))
 		}
 
 		if newParms.AlmostEqual((services.LambdaListFunctionsParameter)){
-			content = services.LambdaListFunctionsProxy(newCacheEntry)
+			rawContent = services.LambdaListFunctionsProxy(newCacheEntry,lambda.NewFromConfig(cfg))
 		}
 		
 		// no actions in go => use python cli
@@ -106,12 +125,12 @@ func main() {
 
 			}
 			data := string(stdout)
-			content = &data
+			rawContent = &data
 		}
 
 		metadata.Provider = newCacheEntry.Provider
 		awclip.WriteMetadata(metadata)
-		awclip.WriteContent(id, content)
+		awclip.WriteContent(id, rawContent)
 	}
 	// Do not cache at all
 	if discriminated {

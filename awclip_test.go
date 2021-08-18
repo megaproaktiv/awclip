@@ -1,8 +1,9 @@
-package awclip
+package awclip_test
 
 import (
 	"reflect"
 	"testing"
+	"github.com/megaproaktiv/awclip"
 )
 
 func TestCleanUp(t *testing.T) {
@@ -40,7 +41,7 @@ func TestCleanUp(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := ArrangeParameters(tt.args.args); !reflect.DeepEqual(got, tt.want) {
+			if got := awclip.ArrangeParameters(tt.args.args); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("CleanUp() = %v, want %v", got, tt.want)
 			}
 		})
