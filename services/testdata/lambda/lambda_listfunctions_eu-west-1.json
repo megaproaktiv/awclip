@@ -1,0 +1,273 @@
+{
+    "Functions": [
+        {
+            "FunctionName": "s3encryptionrule-dev-s3check",
+            "FunctionArn": "arn:aws:lambda:eu-west-1:669453403305:function:s3encryptionrule-dev-s3check",
+            "Runtime": "nodejs6.10",
+            "Role": "arn:aws:iam::669453403305:role/s3encryptionrule-dev-eu-west-1-lambdaRole",
+            "Handler": "s3handler.handler",
+            "CodeSize": 6132221,
+            "Description": "",
+            "Timeout": 20,
+            "MemorySize": 1024,
+            "LastModified": "2017-08-02T09:13:36.617+0000",
+            "CodeSha256": "VS5BtDaHF5TTkl2lk5lDfEp4MQ8ahW085CFuNMDPElw=",
+            "Version": "$LATEST",
+            "TracingConfig": {
+                "Mode": "PassThrough"
+            },
+            "RevisionId": "b0b7501c-9a34-402e-87bb-8637a9995491",
+            "PackageType": "Zip"
+        },
+        {
+            "FunctionName": "amplify-login-define-auth-challenge-ac5a1a0a",
+            "FunctionArn": "arn:aws:lambda:eu-west-1:669453403305:function:amplify-login-define-auth-challenge-ac5a1a0a",
+            "Runtime": "nodejs12.x",
+            "Role": "arn:aws:iam::669453403305:role/amplify-login-lambda-ac5a1a0a",
+            "Handler": "index.handler",
+            "CodeSize": 575,
+            "Description": "",
+            "Timeout": 15,
+            "MemorySize": 256,
+            "LastModified": "2020-12-29T15:23:29.431+0000",
+            "CodeSha256": "JFFtB1qjPOv62pikldsMfpVvikeR3HZxcHSD2BJJ1AA=",
+            "Version": "$LATEST",
+            "TracingConfig": {
+                "Mode": "PassThrough"
+            },
+            "RevisionId": "c8131d72-ed46-48ad-b6e5-f851e284fee7",
+            "PackageType": "Zip"
+        },
+        {
+            "FunctionName": "amplify-login-verify-auth-challenge-ac5a1a0a",
+            "FunctionArn": "arn:aws:lambda:eu-west-1:669453403305:function:amplify-login-verify-auth-challenge-ac5a1a0a",
+            "Runtime": "nodejs12.x",
+            "Role": "arn:aws:iam::669453403305:role/amplify-login-lambda-ac5a1a0a",
+            "Handler": "index.handler",
+            "CodeSize": 6816646,
+            "Description": "",
+            "Timeout": 15,
+            "MemorySize": 256,
+            "LastModified": "2020-12-29T15:23:29.387+0000",
+            "CodeSha256": "rY6CmOem1KDWx9D5pQyXN0RudSMM0JRc/0DUNf9suJY=",
+            "Version": "$LATEST",
+            "Environment": {
+                "Variables": {
+                    "ENDPOINT": "https://16uofz95g4.execute-api.eu-west-1.amazonaws.com/prod"
+                }
+            },
+            "TracingConfig": {
+                "Mode": "PassThrough"
+            },
+            "RevisionId": "bececdc1-462b-419e-84ee-c4cd67372432",
+            "PackageType": "Zip"
+        },
+        {
+            "FunctionName": "aws-config-rules-dev-incomingtraffic",
+            "FunctionArn": "arn:aws:lambda:eu-west-1:669453403305:function:aws-config-rules-dev-incomingtraffic",
+            "Runtime": "nodejs6.10",
+            "Role": "arn:aws:iam::669453403305:role/aws-config-rules-dev-eu-west-1-lambdaRole",
+            "Handler": "incomingtraffic.handler",
+            "CodeSize": 5996635,
+            "Description": "",
+            "Timeout": 6,
+            "MemorySize": 1024,
+            "LastModified": "2019-02-01T11:23:50.576+0000",
+            "CodeSha256": "dMM63StBp6tbMQZxB29dKTfTi38gtDeC9Xeku3Qy8sA=",
+            "Version": "$LATEST",
+            "TracingConfig": {
+                "Mode": "PassThrough"
+            },
+            "RevisionId": "2c44cb81-9bef-4b5f-a5b8-c8722d2b4a08",
+            "PackageType": "Zip"
+        },
+        {
+            "FunctionName": "storage-CustomCDKBucketDeployment8693BB64968944B69-JMEUTTEPLWK3",
+            "FunctionArn": "arn:aws:lambda:eu-west-1:669453403305:function:storage-CustomCDKBucketDeployment8693BB64968944B69-JMEUTTEPLWK3",
+            "Runtime": "python3.6",
+            "Role": "arn:aws:iam::669453403305:role/storage-CustomCDKBucketDeployment8693BB64968944B69-ESL1SGILNJX",
+            "Handler": "index.handler",
+            "CodeSize": 3023,
+            "Description": "",
+            "Timeout": 900,
+            "MemorySize": 128,
+            "LastModified": "2021-05-09T13:04:52.057+0000",
+            "CodeSha256": "MT8VZstRfSqtYUiD/vIcXPs8fygZURcurD7yMO0pbEI=",
+            "Version": "$LATEST",
+            "TracingConfig": {
+                "Mode": "PassThrough"
+            },
+            "RevisionId": "05d8f238-efa8-4a70-9c6f-b1e26e7aa59d",
+            "Layers": [
+                {
+                    "Arn": "arn:aws:lambda:eu-west-1:669453403305:layer:abstractsAwsCliLayer3F9B8BD2:3",
+                    "CodeSize": 11416758
+                }
+            ],
+            "PackageType": "Zip"
+        },
+        {
+            "FunctionName": "amplify-login-custom-message-ac5a1a0a",
+            "FunctionArn": "arn:aws:lambda:eu-west-1:669453403305:function:amplify-login-custom-message-ac5a1a0a",
+            "Runtime": "nodejs12.x",
+            "Role": "arn:aws:iam::669453403305:role/amplify-login-lambda-ac5a1a0a",
+            "Handler": "index.handler",
+            "CodeSize": 828,
+            "Description": "",
+            "Timeout": 15,
+            "MemorySize": 256,
+            "LastModified": "2020-12-29T15:23:29.515+0000",
+            "CodeSha256": "pNag4cuS5SCakjYJtqD0/ukv4PlUTZdbBhGnstz4y5Y=",
+            "Version": "$LATEST",
+            "TracingConfig": {
+                "Mode": "PassThrough"
+            },
+            "RevisionId": "d5812c4c-8591-4c86-a413-01f2cb51c8e8",
+            "PackageType": "Zip"
+        },
+        {
+            "FunctionName": "RedOutputEvent",
+            "FunctionArn": "arn:aws:lambda:eu-west-1:669453403305:function:RedOutputEvent",
+            "Runtime": "nodejs6.10",
+            "Role": "arn:aws:iam::669453403305:role/service-role/RedSimpleOutputEventInLogs",
+            "Handler": "index.handler",
+            "CodeSize": 293,
+            "Description": "",
+            "Timeout": 3,
+            "MemorySize": 128,
+            "LastModified": "2017-12-01T07:13:29.673+0000",
+            "CodeSha256": "HqRFKnV1Jt3lhupfVkfZuodyNoBp2aJ7RSnkf0n/e7E=",
+            "Version": "$LATEST",
+            "TracingConfig": {
+                "Mode": "PassThrough"
+            },
+            "RevisionId": "14acc10b-966d-462d-8fe3-e8ed5cb2411c",
+            "PackageType": "Zip"
+        },
+        {
+            "FunctionName": "OpsWorksDisassociate",
+            "FunctionArn": "arn:aws:lambda:eu-west-1:669453403305:function:OpsWorksDisassociate",
+            "Runtime": "python2.7",
+            "Role": "arn:aws:iam::669453403305:role/lambda_basic_execution",
+            "Handler": "lambda_function.lambda_handler",
+            "CodeSize": 222,
+            "Description": "",
+            "Timeout": 3,
+            "MemorySize": 128,
+            "LastModified": "2018-05-17T10:12:46.381+0000",
+            "CodeSha256": "65c/uZCe6O7Tq9vL8r+8+1OlQY1l1HJIXzbBsyWnXpI=",
+            "Version": "$LATEST",
+            "TracingConfig": {
+                "Mode": "PassThrough"
+            },
+            "RevisionId": "ccbf4445-b345-484a-a375-698de703238d",
+            "PackageType": "Zip"
+        },
+        {
+            "FunctionName": "s3encryptionrule-dev-sgcheck",
+            "FunctionArn": "arn:aws:lambda:eu-west-1:669453403305:function:s3encryptionrule-dev-sgcheck",
+            "Runtime": "nodejs6.10",
+            "Role": "arn:aws:iam::669453403305:role/s3encryptionrule-dev-eu-west-1-lambdaRole",
+            "Handler": "securitygrouphandler.handler",
+            "CodeSize": 6132221,
+            "Description": "",
+            "Timeout": 20,
+            "MemorySize": 1024,
+            "LastModified": "2017-08-02T09:13:54.343+0000",
+            "CodeSha256": "VS5BtDaHF5TTkl2lk5lDfEp4MQ8ahW085CFuNMDPElw=",
+            "Version": "$LATEST",
+            "TracingConfig": {
+                "Mode": "PassThrough"
+            },
+            "RevisionId": "91d3f7db-1911-4925-aad4-df8a3b1ee6c6",
+            "PackageType": "Zip"
+        },
+        {
+            "FunctionName": "s3encryptionrule-dev-wlcheck",
+            "FunctionArn": "arn:aws:lambda:eu-west-1:669453403305:function:s3encryptionrule-dev-wlcheck",
+            "Runtime": "nodejs6.10",
+            "Role": "arn:aws:iam::669453403305:role/s3encryptionrule-dev-eu-west-1-lambdaRole",
+            "Handler": "whitelisthandler.handler",
+            "CodeSize": 6132221,
+            "Description": "",
+            "Timeout": 20,
+            "MemorySize": 1024,
+            "LastModified": "2017-08-02T09:13:45.315+0000",
+            "CodeSha256": "VS5BtDaHF5TTkl2lk5lDfEp4MQ8ahW085CFuNMDPElw=",
+            "Version": "$LATEST",
+            "VpcConfig": {
+                "SubnetIds": [],
+                "SecurityGroupIds": [],
+                "VpcId": ""
+            },
+            "TracingConfig": {
+                "Mode": "PassThrough"
+            },
+            "RevisionId": "bddb5714-1a68-40d0-9785-08dbe266cd93",
+            "PackageType": "Zip"
+        },
+        {
+            "FunctionName": "lahugo",
+            "FunctionArn": "arn:aws:lambda:eu-west-1:669453403305:function:lahugo",
+            "Runtime": "python3.7",
+            "Role": "arn:aws:iam::669453403305:role/service-role/LambdaS3Read",
+            "Handler": "lambda_function.lambda_handler",
+            "CodeSize": 1062,
+            "Description": "",
+            "Timeout": 30,
+            "MemorySize": 1024,
+            "LastModified": "2019-02-15T10:36:49.095+0000",
+            "CodeSha256": "O1Uaao/0REliyzfEdiPUY+TU0zTWk5XdNorRH47qdVc=",
+            "Version": "$LATEST",
+            "VpcConfig": {
+                "SubnetIds": [],
+                "SecurityGroupIds": [],
+                "VpcId": ""
+            },
+            "Environment": {
+                "Variables": {
+                    "DESTINATION_BUCKET": "megaproaktiv.com",
+                    "SOURCE_PATH": "deployment-669453403305-eu-west-1/hugo"
+                }
+            },
+            "TracingConfig": {
+                "Mode": "PassThrough"
+            },
+            "RevisionId": "30b193bb-095d-4586-a354-ea75284355e1",
+            "Layers": [
+                {
+                    "Arn": "arn:aws:lambda:eu-west-1:669453403305:layer:hugo:1",
+                    "CodeSize": 7672129
+                },
+                {
+                    "Arn": "arn:aws:lambda:eu-west-1:669453403305:layer:libstdc:1",
+                    "CodeSize": 491310
+                },
+                {
+                    "Arn": "arn:aws:lambda:eu-west-1:669453403305:layer:aws:2",
+                    "CodeSize": 14172304
+                }
+            ],
+            "PackageType": "Zip"
+        },
+        {
+            "FunctionName": "amplify-login-create-auth-challenge-ac5a1a0a",
+            "FunctionArn": "arn:aws:lambda:eu-west-1:669453403305:function:amplify-login-create-auth-challenge-ac5a1a0a",
+            "Runtime": "nodejs12.x",
+            "Role": "arn:aws:iam::669453403305:role/amplify-login-lambda-ac5a1a0a",
+            "Handler": "index.handler",
+            "CodeSize": 290,
+            "Description": "",
+            "Timeout": 15,
+            "MemorySize": 256,
+            "LastModified": "2020-12-29T15:23:29.471+0000",
+            "CodeSha256": "EP8P9DdpjKtcPrxFZgitOxpu9iEFbZjO8+Rv0iDkRhM=",
+            "Version": "$LATEST",
+            "TracingConfig": {
+                "Mode": "PassThrough"
+            },
+            "RevisionId": "c87f1a62-12b1-4e04-bf75-0dafb866e2f0",
+            "PackageType": "Zip"
+        }
+    ]
+}

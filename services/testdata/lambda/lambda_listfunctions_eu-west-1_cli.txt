@@ -1,0 +1,12 @@
+s3encryptionrule-dev-s3check	nodejs6.10
+amplify-login-define-auth-challenge-ac5a1a0a	nodejs12.x
+amplify-login-verify-auth-challenge-ac5a1a0a	nodejs12.x
+aws-config-rules-dev-incomingtraffic	nodejs6.10
+storage-CustomCDKBucketDeployment8693BB64968944B69-JMEUTTEPLWK3	python3.6
+amplify-login-custom-message-ac5a1a0a	nodejs12.x
+RedOutputEvent	nodejs6.10
+OpsWorksDisassociate	python2.7
+s3encryptionrule-dev-sgcheck	nodejs6.10
+s3encryptionrule-dev-wlcheck	nodejs6.10
+lahugo	python3.7
+amplify-login-create-auth-challenge-ac5a1a0a	nodejs12.x
