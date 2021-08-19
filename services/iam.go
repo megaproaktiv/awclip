@@ -7,7 +7,8 @@ import (
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/iam"
-	"github.com/megaproaktiv/awclip"
+	"github.com/megaproaktiv/awclip/cache"
+
 )
 
 //go:generate moq -out iam_moq_test.go . IamInterface
@@ -23,7 +24,7 @@ type IamInterface interface {
 		optFns ...func(*iam.Options)) (*iam.ListUsersOutput, error)	
 }
 
-var IamListUserParameter = &awclip.Parameters{
+var IamListUserParameter = &cache.Parameters{
 	Service:    aws.String("iam"),
 	Action:     aws.String("list-users"),
 	Output:     aws.String("text"),
@@ -33,7 +34,7 @@ var IamListUserParameter = &awclip.Parameters{
 	Query:      aws.String("Users[*].UserName"),
 }
 
-var IamListUserPoliciesParameter = &awclip.Parameters{
+var IamListUserPoliciesParameter = &cache.Parameters{
 	Service:    aws.String("iam"),
 	Action:     aws.String("list-user-policies"),
 	Output:     aws.String("text"),
@@ -43,7 +44,7 @@ var IamListUserPoliciesParameter = &awclip.Parameters{
 	Query:      aws.String(""),
 }
 
-var IamListAttachedUserPoliciesParameter = &awclip.Parameters{
+var IamListAttachedUserPoliciesParameter = &cache.Parameters{
 	Service:    aws.String("iam"),
 	Action:     aws.String("list-attached-user-policies"),
 	Output:     aws.String("text"),
@@ -53,7 +54,7 @@ var IamListAttachedUserPoliciesParameter = &awclip.Parameters{
 	Query:      aws.String(""),
 }
 
-func IamListUserPoliciesProxy(entry *awclip.CacheEntry, client IamInterface) *string {
+func IamListUserPoliciesProxy(entry *cache.CacheEntry, client IamInterface) *string {
 	if Debug {
 		fmt.Println("IamListUserPoliciesProxy - Start : ", *entry.Parameters.Region)
 	}
@@ -86,7 +87,7 @@ func IamListUserPoliciesProxy(entry *awclip.CacheEntry, client IamInterface) *st
 	return &content
 }
 
-func IamListUserProxy(entry *awclip.CacheEntry,  client IamInterface) *string {
+func IamListUserProxy(entry *cache.CacheEntry,  client IamInterface) *string {
 	entry.Provider = "go"
 	var err error
 	
@@ -122,7 +123,7 @@ func IamListUserProxy(entry *awclip.CacheEntry,  client IamInterface) *string {
 
 }
 
-func IamListAttachedUserPoliciesProxy(entry *awclip.CacheEntry, client IamInterface) *string {
+func IamListAttachedUserPoliciesProxy(entry *cache.CacheEntry, client IamInterface) *string {
 	entry.Provider = "go"
 	var err error
 	

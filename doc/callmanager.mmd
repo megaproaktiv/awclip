@@ -1,0 +1,10 @@
+sequenceDiagram
+    services->>services: init ServiceMap
+    main->>main: rawDataMiss?
+    main-->>callmanager: call(metadata,cfg)
+    callmanager->>callmanager: find Lambda Service in ServiceMap
+    callmanager->>lambda: LambdaListFunctionsProxy(metadata, nil, cfg)
+    lambda ->>json: store raw "listFunctions.json"
+
+    main ->> query: CallQuery(medata)
+    query ->> json: read

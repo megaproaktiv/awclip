@@ -6,3 +6,7 @@
 ## Next ideas
 
 - generate go function code with jennifer
+
+## needs refactoring
+
+- const DATADIR = ".awclip" in services and in awclip

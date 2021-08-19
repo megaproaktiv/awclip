@@ -1,22 +1,22 @@
-package awclip_test
+package cache_test
 
 import (
 	"testing"
 	"time"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
-	"github.com/megaproaktiv/awclip"
 	"github.com/megaproaktiv/awclip/services"
+	"github.com/megaproaktiv/awclip/cache"
 	"gotest.tools/assert"
 )
 
 func TestArgumentsToCachedEntry(t *testing.T) {
 	type args struct {
 		args []string
-		item *awclip.CacheEntry
+		item *cache.CacheEntry
 	}
-	newCacheEntry1 := &awclip.CacheEntry{
-		Parameters: awclip.Parameters{
+	newCacheEntry1 := &cache.CacheEntry{
+		Parameters: cache.Parameters{
 			Service:    new(string),
 			Action:     new(string),
 			Output:     new(string),
@@ -26,8 +26,8 @@ func TestArgumentsToCachedEntry(t *testing.T) {
 			Query:      new(string),
 		},
 	}
-	newCacheEntry2 := &awclip.CacheEntry{
-		Parameters: awclip.Parameters{
+	newCacheEntry2 := &cache.CacheEntry{
+		Parameters: cache.Parameters{
 			Service:    new(string),
 			Action:     new(string),
 			Output:     new(string),
@@ -37,8 +37,8 @@ func TestArgumentsToCachedEntry(t *testing.T) {
 			Query:      new(string),
 		},
 	}
-	newCacheEntry3 := &awclip.CacheEntry{
-		Parameters: awclip.Parameters{
+	newCacheEntry3 := &cache.CacheEntry{
+		Parameters: cache.Parameters{
 			Service:    new(string),
 			Action:     new(string),
 			Output:     new(string),
@@ -48,8 +48,8 @@ func TestArgumentsToCachedEntry(t *testing.T) {
 			Query:      new(string),
 		},
 	}
-	newCacheEntry4 := &awclip.CacheEntry{
-		Parameters: awclip.Parameters{
+	newCacheEntry4 := &cache.CacheEntry{
+		Parameters: cache.Parameters{
 			Service:    new(string),
 			Action:     new(string),
 			Output:     new(string),
@@ -63,7 +63,7 @@ func TestArgumentsToCachedEntry(t *testing.T) {
 	tests := []struct {
 		name string
 		args args
-		want *awclip.Parameters
+		want *cache.Parameters
 	}{
 		{
 			name: "recognise ec2 DescribeInstances",
@@ -83,7 +83,7 @@ func TestArgumentsToCachedEntry(t *testing.T) {
 				},
 				item: newCacheEntry1,
 			},
-			want: &awclip.Parameters{
+			want: &cache.Parameters{
 				Service:    aws.String("ec2"),
 				Action:     aws.String("describe-instances"),
 				Output:     aws.String("text"),
@@ -111,7 +111,7 @@ func TestArgumentsToCachedEntry(t *testing.T) {
 				},
 				item: newCacheEntry2,
 			},
-			want: &awclip.Parameters{
+			want: &cache.Parameters{
 				Service:    aws.String("ec2"),
 				Action:     aws.String("describe-regions"),
 				Output:     aws.String("text"),
@@ -139,7 +139,7 @@ func TestArgumentsToCachedEntry(t *testing.T) {
 				},
 				item: newCacheEntry3,
 			},
-			want: &awclip.Parameters{
+			want: &cache.Parameters{
 				Service:    aws.String("iam"),
 				Action:     aws.String("list-user-policies"),
 				Output:     aws.String("text"),
@@ -167,7 +167,7 @@ func TestArgumentsToCachedEntry(t *testing.T) {
 				},
 				item: newCacheEntry4,
 			},
-			want: &awclip.Parameters{
+			want: &cache.Parameters{
 				Service:    aws.String("iam"),
 				Action:     aws.String("list-attached-user-policies"),
 				Output:     aws.String("text"),
@@ -191,7 +191,7 @@ func TestArgumentsToCachedEntry(t *testing.T) {
 
 func TestAlmostEqualWithParameters(t *testing.T) {
 
-	newParms := &awclip.Parameters{
+	newParms := &cache.Parameters{
 		Service:    aws.String("iam"),
 		Action:     aws.String("list-attached-user-policies"),
 		Output:     aws.String("text"),
@@ -212,7 +212,7 @@ func TestCacheEntry_ArgumentsToCachedEntry(t *testing.T) {
 		Created       time.Time
 		LastAccessed  time.Time
 		AccessCounter int
-		Parameters    awclip.Parameters
+		Parameters    cache.Parameters
 		Provider      string
 	}
 	type args struct {
@@ -227,7 +227,7 @@ func TestCacheEntry_ArgumentsToCachedEntry(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			metadata := &awclip.CacheEntry{
+			metadata := &cache.CacheEntry{
 				Id:            tt.fields.Id,
 				Cmd:           tt.fields.Cmd,
 				Created:       tt.fields.Created,
@@ -253,7 +253,7 @@ func TestCacheEntry_ArgumentsToCachedEntry(t *testing.T) {
 // 	/Users/silberkopf/letsbuild/awclip/main/main.go:31 +0x11d
 // Prowler adds "--region-names" to aws cli ?
 func TestArgumentsToCachedEntryRegionsnames(t *testing.T){
-	metadata := &awclip.CacheEntry{}
+	metadata := &cache.CacheEntry{}
 	var args =  []string{
 		"dist/awclip",
 		"ec2",

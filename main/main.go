@@ -7,13 +7,15 @@ import (
 	"os"
 	"os/exec"
 
+	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/ec2"
 	"github.com/aws/aws-sdk-go-v2/service/iam"
-	"github.com/aws/aws-sdk-go-v2/service/lambda"
 	"github.com/aws/aws-sdk-go-v2/service/sts"
+	"github.com/aws/smithy-go/middleware"
 	"github.com/megaproaktiv/awclip"
 	"github.com/megaproaktiv/awclip/services"
+	"github.com/megaproaktiv/awclip/cache"
 )
 const debug = false
 
@@ -30,11 +32,11 @@ func main() {
 		log.Println("Parameters: ", os.Args)
 	}
 	args := awclip.ArrangeParameters(os.Args)
-	parameters :=  awclip.Parameters{}
+	parameters :=  cache.Parameters{}
 	parameters.ArgumentsToCachedEntry(args)
 	id := parameters.HashValue()
 	
-	metadata := &awclip.CacheEntry{
+	metadata := &cache.CacheEntry{
 		Id: id,
 		Cmd: parameters.CommandLine(),
 		Parameters: parameters,
@@ -53,30 +55,36 @@ func main() {
 	var content *string
 
 	discriminated := awclip.DiscriminatedCommand(&service,&action)
-	if awclip.CacheHit(id) && !discriminated {
+	if cache.CacheHit(id) && !discriminated {
 		// Hit
 		content, _ = awclip.ReadContentUpdate(id)
 		
 	}
-
-	if services.RawCacheHit(metadata) && !discriminated{
-		services.CallManager(metadata)
-	}
-
-
-	//Miss => create entry
-	if awclip.CacheMiss(id) && !discriminated {
-		// fastproxy available?
-		newCacheEntry :=metadata
-		newParms := metadata.Parameters
-		cfg, err := config.LoadDefaultConfig(
+	var cfg aws.Config
+	var err error
+	if !services.RawCacheHit(metadata) && !discriminated{
+		cfg, err = config.LoadDefaultConfig(
 			context.TODO(),
 			// Specify the shared configuration profile to load.
-			config.WithSharedConfigProfile(*newParms.Profile),
+			config.WithSharedConfigProfile(*metadata.Parameters.Profile),
 		)
 		if err != nil {
 			panic("configuration error, " + err.Error())
 		}
+		cfg.APIOptions = append(cfg.APIOptions, func(stack *middleware.Stack) error {
+			// Attach the custom middleware to the beginning of the Desrialize step
+			return stack.Deserialize.Add(services.HandleDeserialize, middleware.After)
+		})
+		services.CallManager(metadata, cfg)
+	}
+
+
+	//Miss => create entry
+	if cache.CacheMiss(id) && !discriminated {
+		// fastproxy available?
+		newCacheEntry :=metadata
+		newParms := metadata.Parameters
+	
 		// CheckPrefetch
 		if ( *newCacheEntry.Parameters.Region == services.FirstRegion) {
 			if newParms.AlmostEqual(services.Ec2DescribeInstancesParameter ) {
@@ -113,7 +121,9 @@ func main() {
 		}
 
 		if newParms.AlmostEqual((services.LambdaListFunctionsParameter)){
-			rawContent = services.LambdaListFunctionsProxy(newCacheEntry,lambda.NewFromConfig(cfg))
+			//services.LambdaListFunctionsProxy(newCacheEntry,lambda.NewFromConfig(cfg))
+			
+
 		}
 		
 		// no actions in go => use python cli
@@ -129,7 +139,7 @@ func main() {
 		}
 
 		metadata.Provider = newCacheEntry.Provider
-		awclip.WriteMetadata(metadata)
+		cache.WriteMetadata(metadata)
 		awclip.WriteContent(id, rawContent)
 	}
 	// Do not cache at all

@@ -7,7 +7,9 @@ import (
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/sts"
-	"github.com/megaproaktiv/awclip"
+
+	"github.com/megaproaktiv/awclip/cache"
+
 )
 
 //go:generate moq -out sts_moq_test.go . StSInterface
@@ -17,7 +19,7 @@ type StSInterface interface {
 		optFns ...func(*sts.Options)) (*sts.GetCallerIdentityOutput, error)
 }
 
-var StsGetCallerIdentityParameter = &awclip.Parameters{
+var StsGetCallerIdentityParameter = &cache.Parameters{
 	Service: aws.String("sts"),
 	Action:  aws.String("get-caller-identity"),
 	Output:  aws.String(""),
@@ -32,7 +34,7 @@ type GetCallerIdentity struct {
 	UserId  *string
 }
 
-func StsGetCallerIdentityProxy(newCacheEntry *awclip.CacheEntry, client StSInterface) *string {
+func StsGetCallerIdentityProxy(newCacheEntry *cache.CacheEntry, client StSInterface) *string {
 
 	newCacheEntry.Provider = "go"
 	

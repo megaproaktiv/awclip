@@ -10,7 +10,7 @@ import (
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/ec2"
-	"github.com/megaproaktiv/awclip"
+	"github.com/megaproaktiv/awclip/cache"
 	"github.com/megaproaktiv/awclip/services"
 )
 
@@ -32,8 +32,8 @@ func TestEc2DescribeInstancesProxy(t *testing.T) {
 	// use mockedEc2Interface in code that requires Ec2Interface
 	// and then make assertions.
 	os.Setenv("AUTO_INIT", "false")
-	config := &awclip.CacheEntry{
-		Parameters: awclip.Parameters{
+	config := &cache.CacheEntry{
+		Parameters: cache.Parameters{
 			Action:  aws.String("describe-instances"),
 			Output:  aws.String("text"),
 			Region:  aws.String("eu-central-1"),

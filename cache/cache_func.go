@@ -1,55 +1,25 @@
-package awclip
+package cache
 
 import (
+	"crypto/md5"
+	"encoding/hex"
 	"io/ioutil"
 	"log"
 	"os"
 	"strings"
 	"time"
-
 	"github.com/aws/aws-sdk-go-v2/aws"
+
+	"github.com/megaproaktiv/awclip/tools"
+	
 )
 
-type ApiCallProviderName string
-
-const (
-	ApiCallProviderNameAws ApiCallProviderName = "aws cli python"
-	ApiCallProviderNameGo  ApiCallProviderName = "go sdk v2"
-)
-
-type ApiCallProvider struct {
-	// Open for extensions like provided calls
-	Name ApiCallProviderName
-}
-
-type Parameters struct {
-	Service    *string
-	Action     *string
-	Output     *string
-	Region     *string
-	Profile    *string
-	AdditionalParameters map[string]*string
-	Query      *string
-}
-
-// CacheEntry
-// Cmd executable command line e.g. aws ec2 describe instances
-//go:generate ffjson metadata.go
-
-type CacheEntry struct {
-	Id            *string
-	Cmd           *string
-	Created       time.Time
-	LastAccessed  time.Time
-	AccessCounter int
-	Parameters    Parameters
-	Provider      string
-}
 
 func WriteMetadata(md *CacheEntry) error {
 	location := GetLocationMetaData(md.Id)
-
+	var err error
 	content, err := md.MarshalJSON()
+	
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -90,6 +60,7 @@ func ReadMetaData(id *string) (*CacheEntry, error) {
 	var metadata CacheEntry
 	// json.Unmarshal(data, &metadata)
 	metadata.UnmarshalJSON(data)
+	
 	if err != nil {
 		log.Printf("failed Unmarshal file: %s", err)
 		return nil, err
@@ -101,6 +72,7 @@ func ReadMetaData(id *string) (*CacheEntry, error) {
 func UpdateMetaData(md *CacheEntry) error {
 	location := GetLocationMetaData(md.Id)
 	md.AccessCounter += 1
+	var err error
 	// content, err := json.Marshal(md)
 	content, err := md.MarshalJSON()
 	if err != nil {
@@ -159,10 +131,10 @@ func (Parameters *Parameters) ArgumentsToCachedEntry(args []string) {
 			}
 		}
 	}
-	Parameters.Query = emptyWhenNil(Parameters.Query)
-	Parameters.Region = emptyWhenNil(Parameters.Region)
-	Parameters.Profile = emptyWhenNil(Parameters.Profile)
-	Parameters.Output = emptyWhenNil(Parameters.Output)
+	Parameters.Query = tools.EmptyWhenNil(Parameters.Query)
+	Parameters.Region = tools.EmptyWhenNil(Parameters.Region)
+	Parameters.Profile = tools.EmptyWhenNil(Parameters.Profile)
+	Parameters.Output = tools.EmptyWhenNil(Parameters.Output)
 }
 
 func (a *Parameters) AlmostEqual(b *Parameters) bool {
@@ -222,13 +194,64 @@ func (p *Parameters) Copy() *Parameters{
 		addOns[index] = element
    }
 	newP := &Parameters{
-		Service:    emptyWhenNil(p.Service),
-		Action:     emptyWhenNil(p.Action),
-		Output:     emptyWhenNil(p.Output),
-		Region:     emptyWhenNil(p.Region),
-		Profile:    emptyWhenNil(p.Profile),
+		Service:    tools.EmptyWhenNil(p.Service),
+		Action:     tools.EmptyWhenNil(p.Action),
+		Output:     tools.EmptyWhenNil(p.Output),
+		Region:     tools.EmptyWhenNil(p.Region),
+		Profile:    tools.EmptyWhenNil(p.Profile),
 		AdditionalParameters: map[string]*string{},
-		Query:      emptyWhenNil(p.Query),
+		Query:      tools.EmptyWhenNil(p.Query),
 	}
 	return newP
 }
+
+func GetLocationData(contentId *string) *string {
+	location := DATADIR + string(os.PathSeparator) + *contentId + ".json"
+	return &location
+}
+func GetLocationMetaData(contentId *string) *string {
+	location := DATADIR + string(os.PathSeparator) + *contentId + "-db.json"
+	return &location
+}
+
+const SEP = " "
+var empty = ""
+
+func (parms *Parameters) CommandLine() *string {
+	commandLine := "aws "
+	
+	commandLine += *tools.EmptyWhenNil(parms.Service) + SEP + 
+	*tools.EmptyWhenNil(parms.Action) + SEP + 
+	*tools.EmptyWhenNil(parms.Region) + SEP +
+	*tools.EmptyWhenNil(parms.Output) + SEP +
+	*tools.EmptyWhenNil(parms.Query)
+	return &commandLine
+}
+
+// HashValue calculates the id of the chache entries
+func (parms *Parameters) HashValue() *string {
+	commandLine := parms.CommandLine()
+	hash := md5.Sum([]byte(*commandLine))
+	hashstring := hex.EncodeToString(hash[:])
+	return &hashstring
+	
+}
+
+
+func CacheMiss(id *string) bool {
+	return !CacheHit(id)
+}
+
+// CacheHit - true if a file with contant is already there
+func CacheHit(id *string) bool {
+	location := GetLocationMetaData(id)
+	info, err := os.Stat(*location)
+	if os.IsNotExist(err) {
+		return false
+	}
+	return !info.IsDir()
+}
+
+
+
+

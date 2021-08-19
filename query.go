@@ -4,6 +4,10 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
+
+	"github.com/megaproaktiv/awclip/services"
+	"github.com/megaproaktiv/awclip/cache"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/jmespath/go-jmespath"
@@ -98,3 +102,16 @@ func Orderkeys(query *string) *[]*string{
 	return nil
 }
 
+// Call Query
+// read prefetched json data and apply query
+func CallQuery(metadata *cache.CacheEntry) *string{
+	//	Query
+	prefetchName := services.ApiCallDumpFileNameString(metadata.Parameters.Service,metadata.Parameters.Action,metadata.Parameters.Region)
+	jsondata, err := ioutil.ReadFile(*prefetchName)
+	if err != nil {
+		panic("read error, " + err.Error())
+	}
+    data := string(jsondata)
+	// to text
+	return QueryText(&data, metadata.Parameters.Query)
+}

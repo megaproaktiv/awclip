@@ -7,7 +7,9 @@ import (
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/ec2"
-	"github.com/megaproaktiv/awclip"
+
+	"github.com/megaproaktiv/awclip/cache"
+
 )
 
 const FirstRegion = "eu-north-1"
@@ -24,7 +26,7 @@ type Ec2Interface interface {
 		optFns ...func(*ec2.Options)) (*ec2.DescribeRegionsOutput, error)
 }
 
-var Ec2DescribeInstancesParameter = &awclip.Parameters{
+var Ec2DescribeInstancesParameter = &cache.Parameters{
 	Service: aws.String("ec2"),
 	Action:  aws.String("describe-instances"),
 	Output:  aws.String("text"),
@@ -33,7 +35,7 @@ var Ec2DescribeInstancesParameter = &awclip.Parameters{
 	Query:   aws.String("Reservations[*].Instances[*].[InstanceId]"),
 }
 
-var Ec2DescribeRegionsParameter = &awclip.Parameters{
+var Ec2DescribeRegionsParameter = &cache.Parameters{
 	Service: aws.String("ec2"),
 	Action:  aws.String("describe-regions"),
 	Output:  aws.String("text"),
@@ -42,7 +44,7 @@ var Ec2DescribeRegionsParameter = &awclip.Parameters{
 	Query:   aws.String("Regions[].RegionName"),
 }
 
-func Ec2DescribeInstancesProxy(entry *awclip.CacheEntry, client Ec2Interface) *string {
+func Ec2DescribeInstancesProxy(entry *cache.CacheEntry, client Ec2Interface) *string {
 
 	if Debug {
 		fmt.Println("Ec2DescribeInstancesProxy - Start : ", *entry.Parameters.Region)
@@ -81,7 +83,7 @@ func Ec2DescribeInstancesProxy(entry *awclip.CacheEntry, client Ec2Interface) *s
 	return &content
 }
 
-func Ec2DescribeRegionsProxy(newCacheEntry *awclip.CacheEntry, client Ec2Interface) *string {
+func Ec2DescribeRegionsProxy(newCacheEntry *cache.CacheEntry, client Ec2Interface) *string {
 	if Debug {
 		fmt.Println("Start describe regions")
 	}

@@ -1,7 +1,6 @@
 package awclip
 
 import (
-	"os"
 	"strings"
 	"unicode"
 )
@@ -22,32 +21,8 @@ func SpaceStringsBuilder(str string) string {
 	return b.String()
 }
 
-func CacheMiss(id *string) bool {
-	return !CacheHit(id)
-}
-
-// CacheHit - true if a file with contant is already there
-func CacheHit(id *string) bool {
-	location := GetLocationMetaData(id)
-	info, err := os.Stat(*location)
-	if os.IsNotExist(err) {
-		return false
-	}
-	return !info.IsDir()
-}
 
 
-
-
-
-func GetLocationData(contentId *string) *string {
-	location := DATADIR + string(os.PathSeparator) + *contentId + ".json"
-	return &location
-}
-func GetLocationMetaData(contentId *string) *string {
-	location := DATADIR + string(os.PathSeparator) + *contentId + "-db.json"
-	return &location
-}
 
 // ArrangeParameters
 // if args contains "--profile" and "profilename", put them at the end

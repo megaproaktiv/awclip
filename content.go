@@ -4,10 +4,12 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"github.com/megaproaktiv/awclip/cache"
+
 )
 
 func ReadContent(id *string) (*string, error) {
-	file, err := os.Open(*GetLocationData(id))
+	file, err := os.Open(*cache.GetLocationData(id))
 	if err != nil {
 		log.Panicf("failed open file: %s", err)
 		return nil, err
@@ -30,8 +32,8 @@ func ReadContentUpdate(id *string) (*string, error) {
 		return nil, err
 	}
 
-	metadata, _ := ReadMetaData(id)
-	err = UpdateMetaData(metadata)
+	metadata, _ := cache.ReadMetaData(id)
+	err = cache.UpdateMetaData(metadata)
 	if err != nil {
 		log.Print(err)
 	}
@@ -39,7 +41,7 @@ func ReadContentUpdate(id *string) (*string, error) {
 }
 
 func WriteContent(id *string, content *string) error {
-	location := GetLocationData(id)
+	location := cache.GetLocationData(id)
 	file, err := os.OpenFile(*location, os.O_RDWR|os.O_CREATE, 0755)
 	if err != nil {
 		log.Panicf("failed open file: %s, %s", *location, err)

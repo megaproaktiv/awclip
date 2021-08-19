@@ -2,24 +2,12 @@ package services
 
 import (
 	"context"
-	"fmt"
-	"io"
-	"io/ioutil"
 	"log"
-	"os"
-
 	"github.com/aws/aws-sdk-go-v2/aws"
-	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/lambda"
-	"github.com/aws/smithy-go/middleware"
+	"github.com/megaproaktiv/awclip/cache"
 
-	// smithy "github.com/aws/smithy-go"
-	smithyio "github.com/aws/smithy-go/io"
-	smithyhttp "github.com/aws/smithy-go/transport/http"
-
-	"github.com/megaproaktiv/awclip"
 )
-
 
 //go:generate moq -out lambda_moq_test.go . LambdaInterface
 
@@ -29,7 +17,7 @@ type LambdaInterface interface {
 	optFns ...func(*lambda.Options)) (*lambda.ListFunctionsOutput, error)
 }
 
-var LambdaListFunctionsParameter = &awclip.Parameters{
+var LambdaListFunctionsParameter = &cache.Parameters{
 	Service: aws.String("lambda"),
 	Action: aws.String("list-functions"),
 	Output: aws.String("text"),
@@ -39,21 +27,17 @@ var LambdaListFunctionsParameter = &awclip.Parameters{
 	Query:      aws.String("Functions[*].{R:Runtime,N:FunctionName}"),
 }
 
-func LambdaListFunctionsProxy(llfpm *awclip.CacheEntry, client LambdaInterface) *string{
+func LambdaListFunctionsProxy(llfpm *cache.CacheEntry, client LambdaInterface, cfg aws.Config) {
 
-	//(base call)
-	if Debug {
-		fmt.Println("lambda:35 Region:", *llfpm.Parameters.Region)
-		fmt.Println("lambda:36 *:", llfpm)
+	if client == nil{
+		client = lambda.NewFromConfig(cfg)
 	}
+
 
 	llfpm.Provider = "go"
 	var err error
 	//var response *lambda.ListFunctionsOutput
 	parms := &lambda.ListFunctionsInput{}
-	if( Debug){
-		fmt.Println("lambda line 39 Region:", *llfpm.Parameters.Region)
-	}
 
 	if len(*llfpm.Parameters.Region) > 4 {
 		_, err = client.ListFunctions(context.TODO(), parms, func(o *lambda.Options) {
@@ -69,87 +53,18 @@ func LambdaListFunctionsProxy(llfpm *awclip.CacheEntry, client LambdaInterface) 
 	}
 
 	// Query
-	prefetchName := ApiCallDumpFileNameString(llfpm.Parameters.Service,llfpm.Parameters.Action,llfpm.Parameters.Region)
-	jsondata, err := ioutil.ReadFile(*prefetchName)
-	if err != nil {
-		panic("read error, " + err.Error())
-	}
-    data := string(jsondata)
-	// to text
-	content := awclip.QueryText(&data, llfpm.Parameters.Query)
-	
-	return content
-}
-
-func ProfiledLambdaClient(entry *awclip.CacheEntry) LambdaInterface{
-	cfg, err := config.LoadDefaultConfig(
-		context.TODO(),
-		// Specify the shared configuration profile to load.
-		config.WithSharedConfigProfile(*entry.Parameters.Profile),
-	)
-	if err != nil {
-		panic("configuration error, " + err.Error())
-	}
-
-	cfg.APIOptions = append(cfg.APIOptions, func(stack *middleware.Stack) error {
-		// Attach the custom middleware to the beginning of the Desrialize step
-		return stack.Deserialize.Add(handleDeserialize, middleware.After)
-	})
-	return  lambda.NewFromConfig(cfg)
-}
-
-// handleDeserialize to save the raw api call json output 
-var handleDeserialize = middleware.DeserializeMiddlewareFunc("dumpjson", func(
-	ctx context.Context, in middleware.DeserializeInput, next middleware.DeserializeHandler,
-) (
-	out middleware.DeserializeOutput, metadata middleware.Metadata, err error,
-) {
-	out, metadata, err = next.HandleDeserialize(ctx, in)
-	if err != nil {
-		return out, metadata, err
-	}
-	response :=out.RawResponse.(*smithyhttp.Response)
-	// if !ok {
-	// 	return out, metadata, &smithy.DeserializationError{Err: fmt.Errorf("unknown transport type %T", out.RawResponse)}
-	// }
-	
-	// fmt.Printf("%T\n",response.Body)
-	// fmt.Printf("%v\n",response.Body)
-	var buff [1024]byte
-	ringBuffer := smithyio.NewRingBuffer(buff[:])
-
-	body := io.TeeReader(response.Body, ringBuffer)
-	// check errors
-
-	
-	prefetchName := ApiCallDumpFileNameCtx(ctx)
-
-	file, err := os.Create(*prefetchName)
-    if err != nil {
-		log.Fatal(err)
-    }
-	_, err = io.Copy(file, body)
-	
-	defer file.Close()
-	
+	// prefetchName := ApiCallDumpFileNameString(llfpm.Parameters.Service,llfpm.Parameters.Action,llfpm.Parameters.Region)
 	// jsondata, err := ioutil.ReadFile(*prefetchName)
-    // check(err)
-    // var data interface{}
-	// err = json.Unmarshal(jsondata, &data)
-	// result, err := jmespath.Search("Functions[*].{R:Runtime,F:FunctionName}", data)
-	// // result, err := jmespath.Search("Functions[*].{R:Runtime,N:FunctionName}", data)
-
-	// fmt.Println("---")
-	// for _,item:=range result.([]interface{}) {
-	// 	thisMap := item.(map[string]interface{})
-	// 	fmt.Printf("%v\t%v\n",thisMap["F"],thisMap["R"])
+	// if err != nil {
+	// 	panic("read error, " + err.Error())
 	// }
-	// fmt.Println("---")
+    // data := string(jsondata)
+	// // to text
+	// content := awclip.QueryText(&data, llfpm.Parameters.Query)
 	
-	// Middleware must call the next middleware to be executed in order to continue execution of the stack.
-	// If an error occurs, you can return to prevent further execution.
-	return next.HandleDeserialize(ctx, in)
-})
+	
+}
+
 
 func check(e error) {
     if e != nil {
