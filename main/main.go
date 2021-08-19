@@ -9,16 +9,14 @@ import (
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
-	"github.com/aws/aws-sdk-go-v2/service/ec2"
-	"github.com/aws/aws-sdk-go-v2/service/iam"
-	"github.com/aws/aws-sdk-go-v2/service/sts"
+
 	"github.com/aws/smithy-go/middleware"
 	"github.com/megaproaktiv/awclip"
-	"github.com/megaproaktiv/awclip/services"
 	"github.com/megaproaktiv/awclip/cache"
+	"github.com/megaproaktiv/awclip/services"
 )
-const debug = false
 
+const debug = false
 
 func main() {
 	services.Debug = false
@@ -27,47 +25,51 @@ func main() {
 
 	service := os.Args[1]
 	action := os.Args[2]
-	
+
 	if debug {
 		log.Println("Parameters: ", os.Args)
 	}
 	args := awclip.ArrangeParameters(os.Args)
-	parameters :=  cache.Parameters{}
+	parameters := cache.Parameters{}
 	parameters.ArgumentsToCachedEntry(args)
 	id := parameters.HashValue()
-	
+
 	metadata := &cache.CacheEntry{
-		Id: id,
-		Cmd: parameters.CommandLine(),
+		Id:         id,
+		Cmd:        parameters.CommandLine(),
 		Parameters: parameters,
-		Provider: "awscli",
+		Provider:   "awscli",
 	}
-	
-	
 
 	if debug {
-		fmt.Println("Main cmd: \n",*metadata.Cmd)
-		fmt.Println("Main id: \n",*id)
+		fmt.Println("Main cmd: \n", *metadata.Cmd)
+		fmt.Println("Main id: \n", *id)
 	}
 	cmd := exec.Command(prg, args[1:]...)
 
-	var rawContent *string
 	var content *string
 
-	discriminated := awclip.DiscriminatedCommand(&service,&action)
+	discriminated := awclip.DiscriminatedCommand(&service, &action)
 	if cache.CacheHit(id) && !discriminated {
 		// Hit
 		content, _ = awclip.ReadContentUpdate(id)
-		
+
 	}
 	var cfg aws.Config
 	var err error
-	if !services.RawCacheHit(metadata) && !discriminated{
-		cfg, err = config.LoadDefaultConfig(
-			context.TODO(),
-			// Specify the shared configuration profile to load.
-			config.WithSharedConfigProfile(*metadata.Parameters.Profile),
-		)
+	if services.RawCacheMiss(metadata) && !discriminated {
+		if len(*metadata.Parameters.Profile) > 2 {
+			cfg, err = config.LoadDefaultConfig(
+				context.TODO(),
+				// Specify the shared configuration profile to load.
+				config.WithSharedConfigProfile(*metadata.Parameters.Profile),
+			)
+		} else {
+			cfg, err = config.LoadDefaultConfig(
+				context.TODO(),
+			)
+
+		}
 		if err != nil {
 			panic("configuration error, " + err.Error())
 		}
@@ -75,57 +77,59 @@ func main() {
 			// Attach the custom middleware to the beginning of the Desrialize step
 			return stack.Deserialize.Add(services.HandleDeserialize, middleware.After)
 		})
+		cfg.APIOptions = append(cfg.APIOptions, func(stack *middleware.Stack) error {
+			// Attach the custom middleware to the beginning of the Desrialize step
+			return stack.Finalize.Add(services.HandleFinalize,middleware.Before)
+		})
 		services.CallManager(metadata, cfg)
 	}
-
 
 	//Miss => create entry
 	if cache.CacheMiss(id) && !discriminated {
 		// fastproxy available?
-		newCacheEntry :=metadata
+		newCacheEntry := metadata
 		newParms := metadata.Parameters
-	
+
 		// CheckPrefetch
-		if ( *newCacheEntry.Parameters.Region == services.FirstRegion) {
-			if newParms.AlmostEqual(services.Ec2DescribeInstancesParameter ) {
-				services.PrefetchEc2DescribeInstancesProxyWrapper(newCacheEntry ,args)
+		if *newCacheEntry.Parameters.Region == services.FirstRegion {
+			if newParms.AlmostEqual(services.Ec2DescribeInstancesParameter) {
+				services.PrefetchEc2DescribeInstancesProxyWrapper(newCacheEntry, args)
 			}
-			if newParms.AlmostEqual((services.LambdaListFunctionsParameter)){
+			if newParms.AlmostEqual((services.LambdaListFunctionsParameter)) {
 				services.PrefetchLambdaListFunctionsProxyWrapper(newCacheEntry)
 			}
 		}
 
 		// Actions implemented in go
 		if newParms.AlmostEqual(services.Ec2DescribeInstancesParameter) {
-			rawContent = services.Ec2DescribeInstancesProxy(newCacheEntry,ec2.NewFromConfig(cfg)) 
-		} 
-		
-		if newParms.AlmostEqual(services.StsGetCallerIdentityParameter) {
-			rawContent = services.StsGetCallerIdentityProxy(newCacheEntry, sts.NewFromConfig(cfg))
-		} 
-		
-		if newParms.AlmostEqual(services.Ec2DescribeRegionsParameter) {
-			rawContent = services.Ec2DescribeRegionsProxy(newCacheEntry,ec2.NewFromConfig(cfg))
-		} 
-
-		if newParms.AlmostEqualWithParameters(services.IamListUserPoliciesParameter){
-			rawContent = services.IamListUserPoliciesProxy(newCacheEntry, iam.NewFromConfig(cfg))
+			content = awclip.CallQuery(metadata)
 		}
-
-		if newParms.AlmostEqual((services.IamListUserParameter)){
-			rawContent = services.IamListUserProxy(newCacheEntry,iam.NewFromConfig(cfg))
-		}
-		
-		if newParms.AlmostEqualWithParameters(services.IamListAttachedUserPoliciesParameter){
-			rawContent = services.IamListAttachedUserPoliciesProxy(newCacheEntry,iam.NewFromConfig(cfg))
-		}
-
-		if newParms.AlmostEqual((services.LambdaListFunctionsParameter)){
+		if newParms.AlmostEqual(services.LambdaListFunctionsParameter) {
 			//services.LambdaListFunctionsProxy(newCacheEntry,lambda.NewFromConfig(cfg))
-			
-
+			//log.Printf("Query - lambda")
+			content = awclip.CallQuery(metadata)
 		}
-		
+
+		// if newParms.AlmostEqual(services.StsGetCallerIdentityParameter) {
+		// 	rawContent = services.StsGetCallerIdentityProxy(newCacheEntry, sts.NewFromConfig(cfg))
+		// }
+
+		// if newParms.AlmostEqual(services.Ec2DescribeRegionsParameter) {
+		// 	rawContent = services.Ec2DescribeRegionsProxy(newCacheEntry,ec2.NewFromConfig(cfg))
+		// }
+
+		// if newParms.AlmostEqualWithParameters(services.IamListUserPoliciesParameter){
+		// 	rawContent = services.IamListUserPoliciesProxy(newCacheEntry, iam.NewFromConfig(cfg))
+		// }
+
+		// if newParms.AlmostEqual((services.IamListUserParameter)){
+		// 	rawContent = services.IamListUserProxy(newCacheEntry,iam.NewFromConfig(cfg))
+		// }
+
+		// if newParms.AlmostEqualWithParameters(services.IamListAttachedUserPoliciesParameter){
+		// 	rawContent = services.IamListAttachedUserPoliciesProxy(newCacheEntry,iam.NewFromConfig(cfg))
+		// }
+
 		// no actions in go => use python cli
 		if newCacheEntry.Provider == "awscli" {
 			// just python aws cli
@@ -135,12 +139,12 @@ func main() {
 
 			}
 			data := string(stdout)
-			rawContent = &data
+			content = &data
 		}
 
 		metadata.Provider = newCacheEntry.Provider
 		cache.WriteMetadata(metadata)
-		awclip.WriteContent(id, rawContent)
+		awclip.WriteContent(id, content)
 	}
 	// Do not cache at all
 	if discriminated {

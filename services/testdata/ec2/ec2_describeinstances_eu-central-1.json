@@ -1,0 +1,135 @@
+{
+    "Reservations": [
+        {
+            "Groups": [],
+            "Instances": [
+                {
+                    "AmiLaunchIndex": 0,
+                    "ImageId": "ami-03c10046b8071fff5",
+                    "InstanceId": "i-038834a1e9d61882a",
+                    "InstanceType": "t4g.nano",
+                    "KeyName": "gg-ffm",
+                    "LaunchTime": "2021-08-01T19:09:32+00:00",
+                    "Monitoring": {
+                        "State": "disabled"
+                    },
+                    "Placement": {
+                        "AvailabilityZone": "eu-central-1b",
+                        "GroupName": "",
+                        "Tenancy": "default"
+                    },
+                    "PrivateDnsName": "ip-172-31-39-21.eu-central-1.compute.internal",
+                    "PrivateIpAddress": "172.31.39.21",
+                    "ProductCodes": [],
+                    "PublicDnsName": "",
+                    "State": {
+                        "Code": 80,
+                        "Name": "stopped"
+                    },
+                    "StateTransitionReason": "User initiated (2021-08-01 19:19:01 GMT)",
+                    "SubnetId": "subnet-0d2cff8c65aaf2f2f",
+                    "VpcId": "vpc-05f8e698b26ee6b20",
+                    "Architecture": "arm64",
+                    "BlockDeviceMappings": [
+                        {
+                            "DeviceName": "/dev/xvda",
+                            "Ebs": {
+                                "AttachTime": "2021-08-01T19:09:33+00:00",
+                                "DeleteOnTermination": true,
+                                "Status": "attached",
+                                "VolumeId": "vol-08c85b80d7537f048"
+                            }
+                        }
+                    ],
+                    "ClientToken": "",
+                    "EbsOptimized": true,
+                    "EnaSupport": true,
+                    "Hypervisor": "xen",
+                    "IamInstanceProfile": {
+                        "Arn": "arn:aws:iam::669453403305:instance-profile/DemoEC2RoleforSSM",
+                        "Id": "AIPAILSWX5MEFQ3H7MTE2"
+                    },
+                    "NetworkInterfaces": [
+                        {
+                            "Attachment": {
+                                "AttachTime": "2021-08-01T19:09:32+00:00",
+                                "AttachmentId": "eni-attach-011991a34ced6c331",
+                                "DeleteOnTermination": true,
+                                "DeviceIndex": 0,
+                                "Status": "attached",
+                                "NetworkCardIndex": 0
+                            },
+                            "Description": "",
+                            "Groups": [
+                                {
+                                    "GroupName": "sshopenmobile",
+                                    "GroupId": "sg-0e407fa43638b8798"
+                                }
+                            ],
+                            "Ipv6Addresses": [],
+                            "MacAddress": "06:cc:aa:0b:1e:f4",
+                            "NetworkInterfaceId": "eni-09e2913a4e9cc09cd",
+                            "OwnerId": "669453403305",
+                            "PrivateDnsName": "ip-172-31-39-21.eu-central-1.compute.internal",
+                            "PrivateIpAddress": "172.31.39.21",
+                            "PrivateIpAddresses": [
+                                {
+                                    "Primary": true,
+                                    "PrivateDnsName": "ip-172-31-39-21.eu-central-1.compute.internal",
+                                    "PrivateIpAddress": "172.31.39.21"
+                                }
+                            ],
+                            "SourceDestCheck": true,
+                            "Status": "in-use",
+                            "SubnetId": "subnet-0d2cff8c65aaf2f2f",
+                            "VpcId": "vpc-05f8e698b26ee6b20",
+                            "InterfaceType": "interface"
+                        }
+                    ],
+                    "RootDeviceName": "/dev/xvda",
+                    "RootDeviceType": "ebs",
+                    "SecurityGroups": [
+                        {
+                            "GroupName": "sshopenmobile",
+                            "GroupId": "sg-0e407fa43638b8798"
+                        }
+                    ],
+                    "SourceDestCheck": true,
+                    "StateReason": {
+                        "Code": "Client.UserInitiatedShutdown",
+                        "Message": "Client.UserInitiatedShutdown: User initiated shutdown"
+                    },
+                    "Tags": [
+                        {
+                            "Key": "Name",
+                            "Value": "demo"
+                        }
+                    ],
+                    "VirtualizationType": "hvm",
+                    "CpuOptions": {
+                        "CoreCount": 2,
+                        "ThreadsPerCore": 1
+                    },
+                    "CapacityReservationSpecification": {
+                        "CapacityReservationPreference": "open"
+                    },
+                    "HibernationOptions": {
+                        "Configured": false
+                    },
+                    "MetadataOptions": {
+                        "State": "applied",
+                        "HttpTokens": "optional",
+                        "HttpPutResponseHopLimit": 1,
+                        "HttpEndpoint": "enabled"
+                    },
+                    "EnclaveOptions": {
+                        "Enabled": false
+                    },
+                    "BootMode": "uefi"
+                }
+            ],
+            "OwnerId": "669453403305",
+            "ReservationId": "r-03b03e60bb56c7dd5"
+        }
+    ]
+}

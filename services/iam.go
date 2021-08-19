@@ -8,7 +8,6 @@ import (
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/iam"
 	"github.com/megaproaktiv/awclip/cache"
-
 )
 
 //go:generate moq -out iam_moq_test.go . IamInterface
@@ -21,37 +20,37 @@ type IamInterface interface {
 		optFns ...func(*iam.Options)) (*iam.ListAttachedUserPoliciesOutput, error)
 	ListUsers(ctx context.Context,
 		params *iam.ListUsersInput,
-		optFns ...func(*iam.Options)) (*iam.ListUsersOutput, error)	
+		optFns ...func(*iam.Options)) (*iam.ListUsersOutput, error)
 }
 
 var IamListUserParameter = &cache.Parameters{
-	Service:    aws.String("iam"),
-	Action:     aws.String("list-users"),
-	Output:     aws.String("text"),
-	Region:     aws.String("*"),
-	Profile:    aws.String("*"),
+	Service:              aws.String("iam"),
+	Action:               aws.String("list-users"),
+	Output:               aws.String("text"),
+	Region:               aws.String("*"),
+	Profile:              aws.String("*"),
 	AdditionalParameters: map[string]*string{"user-name": &any},
-	Query:      aws.String("Users[*].UserName"),
+	Query:                aws.String("Users[*].UserName"),
 }
 
 var IamListUserPoliciesParameter = &cache.Parameters{
-	Service:    aws.String("iam"),
-	Action:     aws.String("list-user-policies"),
-	Output:     aws.String("text"),
-	Region:     aws.String("*"),
-	Profile:    aws.String("*"),
+	Service:              aws.String("iam"),
+	Action:               aws.String("list-user-policies"),
+	Output:               aws.String("text"),
+	Region:               aws.String("*"),
+	Profile:              aws.String("*"),
 	AdditionalParameters: map[string]*string{"user-name": &any},
-	Query:      aws.String(""),
+	Query:                aws.String(""),
 }
 
 var IamListAttachedUserPoliciesParameter = &cache.Parameters{
-	Service:    aws.String("iam"),
-	Action:     aws.String("list-attached-user-policies"),
-	Output:     aws.String("text"),
-	Region:     aws.String("*"),
-	Profile:    aws.String("*"),
+	Service:              aws.String("iam"),
+	Action:               aws.String("list-attached-user-policies"),
+	Output:               aws.String("text"),
+	Region:               aws.String("*"),
+	Profile:              aws.String("*"),
 	AdditionalParameters: map[string]*string{"user-name": &any},
-	Query:      aws.String(""),
+	Query:                aws.String(""),
 }
 
 func IamListUserPoliciesProxy(entry *cache.CacheEntry, client IamInterface) *string {
@@ -87,11 +86,11 @@ func IamListUserPoliciesProxy(entry *cache.CacheEntry, client IamInterface) *str
 	return &content
 }
 
-func IamListUserProxy(entry *cache.CacheEntry,  client IamInterface) *string {
+func IamListUserProxy(entry *cache.CacheEntry, client IamInterface) *string {
 	entry.Provider = "go"
 	var err error
-	
-	var response  *iam.ListUsersOutput 
+
+	var response *iam.ListUsersOutput
 	iamParams := &iam.ListUsersInput{}
 	if len(*entry.Parameters.Region) > 4 {
 		response, err = client.ListUsers(context.TODO(), iamParams, func(o *iam.Options) {
@@ -106,17 +105,17 @@ func IamListUserProxy(entry *cache.CacheEntry,  client IamInterface) *string {
 		log.Fatal(err)
 	}
 	content := ""
-	
+
 	first := true
-	for _, k := range response.Users {	
+	for _, k := range response.Users {
 		if first {
 			first = false
-		}else{
+		} else {
 			content = content + TAB
 		}
 		content = content + *k.UserName
 	}
-	
+
 	content = content + NL
 
 	return &content
@@ -126,7 +125,6 @@ func IamListUserProxy(entry *cache.CacheEntry,  client IamInterface) *string {
 func IamListAttachedUserPoliciesProxy(entry *cache.CacheEntry, client IamInterface) *string {
 	entry.Provider = "go"
 	var err error
-	
 
 	var response *iam.ListAttachedUserPoliciesOutput
 	iamParms := &iam.ListAttachedUserPoliciesInput{
@@ -148,11 +146,9 @@ func IamListAttachedUserPoliciesProxy(entry *cache.CacheEntry, client IamInterfa
 	content := ""
 	header := "ATTACHEDPOLICIES"
 
-	for _, k := range response.AttachedPolicies {	
-		content = content + header+TAB+*k.PolicyArn + TAB + *k.PolicyName + NL
+	for _, k := range response.AttachedPolicies {
+		content = content + header + TAB + *k.PolicyArn + TAB + *k.PolicyName + NL
 	}
-	
 
 	return &content
 }
-

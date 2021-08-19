@@ -8,10 +8,8 @@ import (
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
-	"github.com/aws/aws-sdk-go-v2/service/ec2"
 	"github.com/aws/aws-sdk-go-v2/service/lambda"
 	"github.com/megaproaktiv/awclip/cache"
-
 )
 
 var (
@@ -50,11 +48,8 @@ func PrefetchEc2DescribeInstancesProxyWrapper(newCacheEntry *cache.CacheEntry, a
 	if err != nil {
 		panic("configuration error, " + err.Error())
 	}
-	client := ec2.NewFromConfig(cfg)
-	if newCacheEntry.Parameters.Region == nil {
-		newCacheEntry.Parameters.Region = &cfg.Region
-	}
-	PrefetchEc2DescribeInstancesProxy(newCacheEntry, client, args)
+
+	PrefetchEc2DescribeInstancesProxy(newCacheEntry, cfg)
 }
 
 func PrefetchLambdaListFunctionsProxyWrapper(metadata *cache.CacheEntry) {
@@ -80,19 +75,18 @@ func PrefetchLambdaListFunctionsProxyWrapper(metadata *cache.CacheEntry) {
 	PrefetchLambdaListFunctionsProxy(metadata, client)
 }
 
-func PrefetchEc2DescribeInstancesProxy(metadata *cache.CacheEntry, client Ec2Interface, args []string) error {
+func PrefetchEc2DescribeInstancesProxy(metadata *cache.CacheEntry, cfg aws.Config) error {
 	var wg sync.WaitGroup
 
-
 	for _, region := range regions {
-		
+
 		if Debug {
 			fmt.Println("Range Region: ", region)
 		}
-		
+
 		metadata.Parameters.Region = &region
 		//reCalc ID
-		id :=metadata.Parameters.HashValue()
+		id := metadata.Parameters.HashValue()
 
 		regionalEntry := *metadata
 		regionalEntry.Parameters.Region = &region
@@ -100,7 +94,7 @@ func PrefetchEc2DescribeInstancesProxy(metadata *cache.CacheEntry, client Ec2Int
 		if cache.CacheMiss(id) {
 
 			wg.Add(1)
-			go calcInstances(&wg, id, metadata, client)
+			go calcInstances(&wg, id, metadata, cfg)
 
 		}
 		if Debug {
@@ -116,7 +110,7 @@ func PrefetchEc2DescribeInstancesProxy(metadata *cache.CacheEntry, client Ec2Int
 func PrefetchLambdaListFunctionsProxy(metadata *cache.CacheEntry, client LambdaInterface) error {
 	var wg sync.WaitGroup
 
-	var MetadataRegionMap = make(map[string] *cache.CacheEntry)
+	var MetadataRegionMap = make(map[string]*cache.CacheEntry)
 	for _, region := range regions {
 
 		if Debug {
@@ -127,18 +121,18 @@ func PrefetchLambdaListFunctionsProxy(metadata *cache.CacheEntry, client LambdaI
 
 		// If region is bound to goroutine, the value will change
 		MetadataRegionMap[region].Parameters.Region = aws.String(region)
-		
-		MetadataRegionMap[region].Id =MetadataRegionMap[region].Parameters.HashValue()
-		
+
+		MetadataRegionMap[region].Id = MetadataRegionMap[region].Parameters.HashValue()
+
 		if Debug {
-			fmt.Println("prefetch:129 Lambda  id:",*MetadataRegionMap[region].Id)
-			fmt.Println("prefetch:130 Lambda  region:",*MetadataRegionMap[region].Parameters.Region)
-			fmt.Printf("prefetch:131 Meta %v \nLocalmeta %v",MetadataRegionMap[region],metadata)
+			fmt.Println("prefetch:129 Lambda  id:", *MetadataRegionMap[region].Id)
+			fmt.Println("prefetch:130 Lambda  region:", *MetadataRegionMap[region].Parameters.Region)
+			fmt.Printf("prefetch:131 Meta %v \nLocalmeta %v", MetadataRegionMap[region], metadata)
 		}
-		
-		if cache.CacheMiss(MetadataRegionMap[region].Id) {			
+
+		if cache.CacheMiss(MetadataRegionMap[region].Id) {
 			wg.Add(1)
-			go calcFunctions(&wg, MetadataRegionMap[region], client)
+			go calcFunctions(&wg, MetadataRegionMap[region])
 
 		}
 		if Debug {
@@ -163,35 +157,34 @@ func replaceRegion(args []string, region string) []string {
 	return args
 }
 
-func calcInstances(wg *sync.WaitGroup, id *string, metadata *cache.CacheEntry, client Ec2Interface) {
+func calcInstances(wg *sync.WaitGroup, id *string, metadata *cache.CacheEntry, cfg aws.Config) {
 	defer wg.Done()
-	
-	Ec2DescribeInstancesProxy(metadata,client)
-	
+
+	Ec2DescribeInstancesProxy(metadata, cfg)
+
 	start := time.Now()
-	
+
 	metadata.Created = start
-	metadata.LastAccessed=  start
-	metadata.AccessCounter= 0
+	metadata.LastAccessed = start
+	metadata.AccessCounter = 0
 	metadata.Provider = "go - prefetch"
 	cache.WriteMetadata(metadata)
 }
 
-
-func calcFunctions(wg *sync.WaitGroup,  meta *cache.CacheEntry, client LambdaInterface) {
+func calcFunctions(wg *sync.WaitGroup, meta *cache.CacheEntry) {
 	defer wg.Done()
-	
+
 	if Debug {
 		fmt.Println("prefetch:184 ", meta.Parameters.Region)
 		fmt.Println("prefetch Line 183 Region:", *meta.Parameters.Region)
 		fmt.Println("prefetch Line 187 metadata *:", meta)
 	}
-	LambdaListFunctionsProxy(meta, client, aws.Config{})
-	
+	LambdaListFunctionsProxy(meta, aws.Config{})
+
 	start := time.Now()
 	meta.Created = start
-	meta.LastAccessed=  start
-	meta.AccessCounter= 0
+	meta.LastAccessed = start
+	meta.AccessCounter = 0
 	meta.Provider = "go - prefetch"
 
 	cache.WriteMetadata(meta)

@@ -9,12 +9,10 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/ec2"
 
 	"github.com/megaproaktiv/awclip/cache"
-
 )
 
 const FirstRegion = "eu-north-1"
 const DefaultRegion = "us-west-1"
-
 
 //go:generate moq -out ec2_moq_test.go . Ec2Interface
 type Ec2Interface interface {
@@ -44,43 +42,27 @@ var Ec2DescribeRegionsParameter = &cache.Parameters{
 	Query:   aws.String("Regions[].RegionName"),
 }
 
-func Ec2DescribeInstancesProxy(entry *cache.CacheEntry, client Ec2Interface) *string {
+func Ec2DescribeInstancesProxy(llfpm *cache.CacheEntry, cfg aws.Config) {
 
-	if Debug {
-		fmt.Println("Ec2DescribeInstancesProxy - Start : ", *entry.Parameters.Region)
-	}
+	client := ec2.NewFromConfig(cfg)
 
-	entry.Provider = "go"
-	
-	var response *ec2.DescribeInstancesOutput
+	llfpm.Provider = "go"
 	var err error
-	if len(*entry.Parameters.Region) > 4 {
-		response, err = client.DescribeInstances(context.TODO(), nil, func(o *ec2.Options) {
-			o.Region = *entry.Parameters.Region
+
+	if len(*llfpm.Parameters.Region) > 4 {
+		_, err = client.DescribeInstances(context.TODO(), nil, func(o *ec2.Options) {
+			o.Region = *llfpm.Parameters.Region
 		})
 	} else {
-		response, err = client.DescribeInstances(context.TODO(), nil)
+		_, err = client.DescribeInstances(context.TODO(), nil)
 	}
 
 	if err != nil {
 		log.Println("Cant connect to ec2 service")
-		log.Println("Region:", *entry.Parameters.Region)
+		log.Println("Region:", *llfpm.Parameters.Region)
 		log.Fatal(err)
 	}
-	// Content for --query_Reservations[*].Instances[*].[InstanceId]
-	content := ""
-	if *entry.Parameters.Query == "Reservations[*].Instances[*].[InstanceId]" {
-		for _, v := range response.Reservations {
-			for _, k := range v.Instances {
-				content = content + *k.InstanceId
-			}
-		}
-	}
-	content += "\n"
-	if Debug {
-		fmt.Println("Ec2DescribeInstancesProxy - End : ", *entry.Parameters.Region)
-	}
-	return &content
+
 }
 
 func Ec2DescribeRegionsProxy(newCacheEntry *cache.CacheEntry, client Ec2Interface) *string {
@@ -89,7 +71,6 @@ func Ec2DescribeRegionsProxy(newCacheEntry *cache.CacheEntry, client Ec2Interfac
 	}
 
 	newCacheEntry.Provider = "go"
-	
 
 	var response *ec2.DescribeRegionsOutput
 	var err error
@@ -109,7 +90,7 @@ func Ec2DescribeRegionsProxy(newCacheEntry *cache.CacheEntry, client Ec2Interfac
 	// Content for --query_Reservations[*].Instances[*].[InstanceId]
 	content := ""
 
-	length := len(response.Regions)-1
+	length := len(response.Regions) - 1
 	for i, v := range response.Regions {
 		content = content + *v.RegionName
 		if i < length {

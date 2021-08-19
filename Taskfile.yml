@@ -10,9 +10,9 @@ tasks:
     sources: 
       - ./*.go
       - ./services/*.go
-      - services/prefetch.go
-      - services/lambda.go
-      - ./main/main.go
+      - ./cache/*.go
+      - ./tools/*.go
+      - ./main/*.go
     generates:
       - dist/awclip    
     cmds:
@@ -67,11 +67,11 @@ tasks:
       - cmd: echo aws
         silent: true
       - cmd: time aws ec2 describe-instances  --output text --region "eu-central-1" --query "Reservations[*].Instances[*].[InstanceId]"  >testdata/out/ec2-di-cli.json
-        silent: true
+        
       - cmd: echo awclip
         silent: true
       - cmd: time dist/awclip ec2 describe-instances --output text --region "eu-central-1" --query "Reservations[*].Instances[*].[InstanceId]"  >testdata/out/ec2-di-clip.json
-        silent: true
+        
       - cmd: echo test
       - cmd: diff testdata/out/ec2-di-cli.json testdata/out/ec2-di-clip.json && echo "PASS"
         silent: true
@@ -89,6 +89,13 @@ tasks:
     silent: false
 
   test-lambda:
+    desc: Test Lambda List Functions
+    deps: [clean, build]
+    cmds:
+     - dist/awclip lambda list-functions --region eu-west-1 --output text --query "Functions[*].{R:Runtime,N:FunctionName}" --profile ggtrcadmin    
+    silent: false
+
+  test-lambda-prefetch:
     desc: Test Lambda List Functions
     deps: [clean, build]
     cmds:

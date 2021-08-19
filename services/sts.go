@@ -9,7 +9,6 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/sts"
 
 	"github.com/megaproaktiv/awclip/cache"
-
 )
 
 //go:generate moq -out sts_moq_test.go . StSInterface
@@ -37,7 +36,7 @@ type GetCallerIdentity struct {
 func StsGetCallerIdentityProxy(newCacheEntry *cache.CacheEntry, client StSInterface) *string {
 
 	newCacheEntry.Provider = "go"
-	
+
 	var response *sts.GetCallerIdentityOutput
 	var err error
 

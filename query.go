@@ -5,11 +5,14 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	
 
-	"github.com/megaproaktiv/awclip/services"
 	"github.com/megaproaktiv/awclip/cache"
+	"github.com/megaproaktiv/awclip/services"
+	"github.com/megaproaktiv/awclip/tools"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
+	 
 	"github.com/jmespath/go-jmespath"
 )
 
@@ -31,7 +34,7 @@ func QueryText(input *string, query *string) *string{
 	
 	var buffer bytes.Buffer
 	anArray := result.([]interface{})
-	parseArray(anArray,keys,&buffer)
+	tools.ParseArray(anArray,keys,&buffer)
 
 	text := buffer.String()
 	//fmt.Println("Text: \n",text)
@@ -41,45 +44,6 @@ func QueryText(input *string, query *string) *string{
 // Order Problem
 // https://golang.org/ref/spec#For_statements
 // The iteration order over maps is not specified and is not guaranteed to be the same from one iteration to the next.
-
-func parseMap(aMap map[string]interface{}, keys *[]*string,buffy *bytes.Buffer) {
-	first := true
-	for _,key := range *keys {
-		val := aMap[*key]
-		switch concreteVal := val.(type) {
-		case map[string]interface{}:
-			buffy.WriteString(val.(string))
-			parseMap(val.(map[string]interface{}), keys, buffy)
-		case []interface{}:
-			buffy.WriteString(val.(string))
-			parseArray(val.([]interface{}),keys, buffy)
-		default:
-			if first {
-				first = false
-			}else{
-				buffy.WriteString(TAB)
-			}
-			value := concreteVal.(string)
-			all := buffy.String()
-			_ = all
-			buffy.WriteString(value)
-		}
-	}
-	buffy.WriteString(NL)
-}
-
-func parseArray(anArray []interface{} ,keys *[]*string,buffy *bytes.Buffer) {
-	for _, val := range anArray {
-		switch concreteVal := val.(type) {
-		case map[string]interface{}:
-			parseMap(val.(map[string]interface{}),keys , buffy)
-		case []interface{}:
-			parseArray(val.([]interface{}),keys ,buffy)
-		default:
-			buffy.WriteString(concreteVal.(string))
-		}
-	}
-}
 
 
 // the AWS CLI got the order wrong
@@ -107,11 +71,14 @@ func Orderkeys(query *string) *[]*string{
 func CallQuery(metadata *cache.CacheEntry) *string{
 	//	Query
 	prefetchName := services.ApiCallDumpFileNameString(metadata.Parameters.Service,metadata.Parameters.Action,metadata.Parameters.Region)
-	jsondata, err := ioutil.ReadFile(*prefetchName)
+	
+	responseData, err := ioutil.ReadFile(*prefetchName)
 	if err != nil {
 		panic("read error, " + err.Error())
 	}
-    data := string(jsondata)
+    data := string(responseData)
 	// to text
-	return QueryText(&data, metadata.Parameters.Query)
+	text := QueryText(&data, metadata.Parameters.Query)
+	//fmt.Println("Text", *text)
+	return text
 }
