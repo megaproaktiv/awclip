@@ -4,3 +4,4 @@ dist
 dist/
 .vscode
 file:
+.vscode/launch.json

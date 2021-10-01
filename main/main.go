@@ -57,6 +57,7 @@ func main() {
 	}
 	var cfg aws.Config
 	var err error
+	// RawCache saves the api call json data without filter
 	if services.RawCacheMiss(metadata) && !discriminated {
 		if len(*metadata.Parameters.Profile) > 2 {
 			cfg, err = config.LoadDefaultConfig(
@@ -73,14 +74,18 @@ func main() {
 		if err != nil {
 			panic("configuration error, " + err.Error())
 		}
-		cfg.APIOptions = append(cfg.APIOptions, func(stack *middleware.Stack) error {
-			// Attach the custom middleware to the beginning of the Desrialize step
-			return stack.Deserialize.Add(services.HandleDeserialize, middleware.After)
-		})
-		cfg.APIOptions = append(cfg.APIOptions, func(stack *middleware.Stack) error {
-			// Attach the custom middleware to the beginning of the Desrialize step
-			return stack.Finalize.Add(services.HandleFinalize,middleware.Before)
-		})
+		// Attach the custom middleware to the beginning of the Deserialize step
+		// Output file after gett data from api
+		// works for non ec2
+
+		awsService := *metadata.Parameters.Service 
+		if awsService != "ec2" {
+			cfg.APIOptions = append(cfg.APIOptions, func(stack *middleware.Stack) error {
+				return stack.Deserialize.Add(services.HandleDeserializeJson, middleware.After)
+			})
+		}
+
+	
 		services.CallManager(metadata, cfg)
 	}
 

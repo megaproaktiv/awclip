@@ -3,7 +3,6 @@ package services
 import (
 	
 	"context"
-	"encoding/json"
 	"io"
 	"log"
 	"os"
@@ -12,8 +11,7 @@ import (
 	"github.com/megaproaktiv/awclip/cache"
 	
 	gomiddleware "github.com/aws/aws-sdk-go-v2/aws/middleware"
-	"github.com/aws/aws-sdk-go-v2/service/ec2"
-
+	xj "github.com/basgys/goxml2json"
 	// smithy "github.com/aws/smithy-go"
 	smithyio "github.com/aws/smithy-go/io"
 	"github.com/aws/smithy-go/middleware"
@@ -64,9 +62,6 @@ func ApiCallDumpFileNameCtx(ctx context.Context) *string {
 
 func ApiCallDumpFileNameString(serviceId *string, operationName *string, region *string) *string {
 	postfix := ".json"
-	if( strings.ToLower(*serviceId) == "ec2"){
-		postfix = ".xml"
-	}
 	ops := strings.Replace(*operationName, "-", "", 1)
 	name := DATADIR + "/" + *serviceId + "_" + ops + "_" + *region + postfix
 	normalized := strings.ToLower(name)
@@ -90,7 +85,7 @@ func RawCacheHit(entry *cache.CacheEntry) bool {
 }
 
 // handleDeserialize to save the raw api call json output
-var HandleDeserialize = middleware.DeserializeMiddlewareFunc("dumpjson", func(
+var HandleDeserializeJson = middleware.DeserializeMiddlewareFunc("dumpjson", func(
 	ctx context.Context, in middleware.DeserializeInput, next middleware.DeserializeHandler,
 ) (
 	out middleware.DeserializeOutput, metadata middleware.Metadata, err error,
@@ -119,34 +114,73 @@ var HandleDeserialize = middleware.DeserializeMiddlewareFunc("dumpjson", func(
 	return out, metadata, nil
 })
 
-var HandleFinalize = middleware.FinalizeMiddlewareFunc("dumpjson", func(
-	ctx context.Context, in middleware.FinalizeInput, next middleware.FinalizeHandler,
+var HandleDeserializeXML = middleware.DeserializeMiddlewareFunc("dumpxml2json", func(
+	ctx context.Context, in middleware.DeserializeInput, next middleware.DeserializeHandler,
 ) (
-	out middleware.FinalizeOutput, metadata middleware.Metadata, err error,
+	out middleware.DeserializeOutput, metadata middleware.Metadata, err error,
 ) {
-	out, metadata, err = next.HandleFinalize(ctx, in)
+	out, metadata, err = next.HandleDeserialize(ctx, in)
 	if err != nil {
 		return out, metadata, err
 	}
-	//response := out.RawResponse.(*smithyhttp.Response)
-	response := out.Result
+	response := out.RawResponse.(*smithyhttp.Response)
 
-	ec2_DescribeInstancesOutput := response.(*ec2.DescribeInstancesOutput)
+	var buff [1024]byte
+	ringBuffer := smithyio.NewRingBuffer(buff[:])
 
-	u, err := json.Marshal(ec2_DescribeInstancesOutput)
-        if err != nil {
-            panic(err)
-        }
-	
+	xml := io.TeeReader(response.Body, ringBuffer)
+
 	prefetchName := ApiCallDumpFileNameCtx(ctx)
 	
-	file, err := os.Create(*prefetchName+".wew")
+	json, err := xj.Convert(xml)
+  	if err != nil {
+  		panic("That's embarrassing...")
+  	}
+
+
+	file, err := os.Create(*prefetchName)
 	if err != nil {
 		log.Fatal(err)
 	}
-	_, err = io.WriteString(file, string(u))
+	_, err = io.Copy(file, json)
 
 	defer file.Close()
 
 	return out, metadata, nil
 })
+
+
+// // EC2 describe handle special because of ec2=xml
+// var HandleFinalize = middleware.FinalizeMiddlewareFunc("dumpjson", func(
+// 	ctx context.Context, in middleware.FinalizeInput, next middleware.FinalizeHandler,
+// ) (
+// 	out middleware.FinalizeOutput, metadata middleware.Metadata, err error,
+// ) {
+// 	out, metadata, err = next.HandleFinalize(ctx, in)
+// 	if err != nil {
+// 		return out, metadata, err
+// 	}
+// 	//response := out.RawResponse.(*smithyhttp.Response)
+// 	response := out.Result
+
+// 	ec2_DescribeInstancesOutput := response.(*ec2.DescribeInstancesOutput)
+
+// 	u, err := json.Marshal(ec2_DescribeInstancesOutput)
+//         if err != nil {
+//             panic(err)
+//         }
+	
+// 	prefetchName := ApiCallDumpFileNameCtx(ctx)
+	
+// 	file, err := os.Create(*prefetchName+".wew")
+// 	if err != nil {
+// 		log.Fatal(err)
+// 	}
+// 	_, err = io.WriteString(file, string(u))
+
+// 	defer file.Close()
+
+// 	return out, metadata, nil
+// })
+
+

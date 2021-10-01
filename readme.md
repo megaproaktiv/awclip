@@ -119,13 +119,13 @@ if you copy awclip into the same directory.
 
 ### current
   ## ADD
-  - jmespath query. Because map ordering is not guarenteed, a key array is needed. This also fixes the ordering bug of aws cli text python
+  - jmespath query. Because map ordering is not guaranteed, a key array is needed. This also fixes the ordering bug of aws cli text python
 
 ### v0.1.8
   ## ADD
   - add iam list-users
   - add prefetch lambda list function (prowler 762)
-  - baxch script tests
+  - batch script tests
   ## CHANGE
   - change id to struct parameter based, not cmd line based
 ### v0.1.6
