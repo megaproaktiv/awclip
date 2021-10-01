@@ -20,6 +20,8 @@ If awclip binary is in /usr/local/bin:
 
 Base functionality is working, no guarantee that it works on all services.
 
+2021-10-01
+
 ## Example
 
 Time with aws cli:
