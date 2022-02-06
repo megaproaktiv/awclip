@@ -3,15 +3,16 @@ package cache
 import (
 	"crypto/md5"
 	"encoding/hex"
+	"fmt"
 	"io/ioutil"
 	"log"
 	"os"
 	"strings"
 	"time"
+
 	"github.com/aws/aws-sdk-go-v2/aws"
 
 	"github.com/megaproaktiv/awclip/tools"
-	
 )
 
 
@@ -188,6 +189,13 @@ func (d *CacheEntry) Copy() *CacheEntry{
 	return newD
 }
 
+func (d *CacheEntry) Print(){
+	fmt.Println("Id    : ",*d.Id)
+	fmt.Println("Cmd   : ",*d.Cmd)
+	d.Parameters.Print()
+}
+
+
 func (p *Parameters) Copy() *Parameters{
 	addOns := make(map[string]*string)
 	for index, element  := range p.AdditionalParameters{        
@@ -204,6 +212,15 @@ func (p *Parameters) Copy() *Parameters{
 	}
 	return newP
 }
+
+func (p *Parameters) Print(){
+	fmt.Println("Service: ",*p.Service)
+	fmt.Println("Action : ",*p.Action)
+	for key, element := range p.AdditionalParameters {
+		fmt.Println(key, " : ", *element)
+	}
+}
+
 
 func GetLocationData(contentId *string) *string {
 	location := DATADIR + string(os.PathSeparator) + *contentId + ".json"
@@ -225,6 +242,9 @@ func (parms *Parameters) CommandLine() *string {
 	*tools.EmptyWhenNil(parms.Region) + SEP +
 	*tools.EmptyWhenNil(parms.Output) + SEP +
 	*tools.EmptyWhenNil(parms.Query)
+	for key, element := range parms.AdditionalParameters {
+		commandLine += SEP + key + SEP + *element
+	}
 	return &commandLine
 }
 

@@ -9,6 +9,7 @@ import (
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
+	"github.com/aws/aws-sdk-go-v2/service/iam"
 
 	"github.com/aws/smithy-go/middleware"
 	"github.com/megaproaktiv/awclip"
@@ -16,10 +17,10 @@ import (
 	"github.com/megaproaktiv/awclip/services"
 )
 
-const debug = false
+const debug = true
 
 func main() {
-	services.Debug = false
+	services.Debug = debug
 
 	prg := "aws"
 
@@ -30,9 +31,12 @@ func main() {
 		log.Println("Parameters: ", os.Args)
 	}
 	args := awclip.ArrangeParameters(os.Args)
+	
 	parameters := cache.Parameters{}
 	parameters.ArgumentsToCachedEntry(args)
+	
 	id := parameters.HashValue()
+	
 
 	metadata := &cache.CacheEntry{
 		Id:         id,
@@ -56,33 +60,59 @@ func main() {
 
 	}
 	var cfg aws.Config
-	var err error
-	if services.RawCacheMiss(metadata) && !discriminated {
-		if len(*metadata.Parameters.Profile) > 2 {
-			cfg, err = config.LoadDefaultConfig(
-				context.TODO(),
-				// Specify the shared configuration profile to load.
-				config.WithSharedConfigProfile(*metadata.Parameters.Profile),
-			)
-		} else {
-			cfg, err = config.LoadDefaultConfig(
-				context.TODO(),
-			)
+	var err error 
+	if len(*metadata.Parameters.Profile) > 2 {
+		cfg, err = config.LoadDefaultConfig(
+			context.TODO(),
+			// Specify the shared configuration profile to load.
+			config.WithSharedConfigProfile(*metadata.Parameters.Profile),
+		)
+	} else {
+		cfg, err = config.LoadDefaultConfig(
+			context.TODO(),
+		)
+	}
+	if err != nil {
+		panic(err)
+	}
 
-		}
-		if err != nil {
-			panic("configuration error, " + err.Error())
-		}
+	
+	// Prefetch check116
+	if ( services.RawCacheMiss(metadata) && *metadata.Parameters.Service == "iam" && *metadata.Parameters.Action == "list-attached-user-policies" ){
+		client := iam.NewFromConfig(cfg)
+		users,err := services.IamListUsers(metadata, client)
 		cfg.APIOptions = append(cfg.APIOptions, func(stack *middleware.Stack) error {
-			// Attach the custom middleware to the beginning of the Desrialize step
+			// Attach the custom middleware to the beginning of the Deserialize step
 			return stack.Deserialize.Add(services.HandleDeserialize, middleware.After)
 		})
-		cfg.APIOptions = append(cfg.APIOptions, func(stack *middleware.Stack) error {
-			// Attach the custom middleware to the beginning of the Desrialize step
-			return stack.Finalize.Add(services.HandleFinalize,middleware.Before)
-		})
 		services.CallManager(metadata, cfg)
+		if err == nil{
+			if debug {
+				log.Println("Prefetch")
+				metadata.Print()
+			}
+			err = services.PrefetchIamListAttachedUserPoliciesProxy(metadata, client, users)
+			if err != nil{
+				log.Fatal(err)
+			}
+
+		}
 	}
+
+	// if services.RawCacheMiss(metadata) && !discriminated {
+	// 	if err != nil {
+	// 		panic("configuration error, " + err.Error())
+	// 	}
+	// 	cfg.APIOptions = append(cfg.APIOptions, func(stack *middleware.Stack) error {
+	// 		// Attach the custom middleware to the beginning of the Desrialize step
+	// 		return stack.Deserialize.Add(services.HandleDeserialize, middleware.After)
+	// 	})
+	// 	cfg.APIOptions = append(cfg.APIOptions, func(stack *middleware.Stack) error {
+	// 		// Attach the custom middleware to the beginning of the Desrialize step
+	// 		return stack.Finalize.Add(services.HandleFinalize,middleware.Before)
+	// 	})
+	// 	services.CallManager(metadata, cfg)
+	// }
 
 	//Miss => create entry
 	if cache.CacheMiss(id) && !discriminated {
@@ -122,9 +152,7 @@ func main() {
 		// 	rawContent = services.IamListUserPoliciesProxy(newCacheEntry, iam.NewFromConfig(cfg))
 		// }
 
-		// if newParms.AlmostEqual((services.IamListUserParameter)){
-		// 	rawContent = services.IamListUserProxy(newCacheEntry,iam.NewFromConfig(cfg))
-		// }
+
 
 		// if newParms.AlmostEqualWithParameters(services.IamListAttachedUserPoliciesParameter){
 		// 	rawContent = services.IamListAttachedUserPoliciesProxy(newCacheEntry,iam.NewFromConfig(cfg))

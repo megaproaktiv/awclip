@@ -1,0 +1,108 @@
+# https://taskfile.dev
+
+version: '3'
+
+vars:
+  profile: ggtrcadmin
+
+tasks:
+  clean:
+    desc: clean .awclip
+    cmds:
+      - rm .awclip/*
+      - rm output/*
+    silent: true
+    ignore_error: true
+    
+  single:
+    desc: Run only check310
+    cmds: 
+      - time ./prowler  -r eu-central-1 -c check310    
+  ec2:
+    desc: Run ec2 check 758
+    cmds:
+      - time ./prowler  -p {{.profile}} -r eu-central-1 -c extra758 
+      #- time ./prowler -p ggtrcadmin -r eu-central-1 -c extra758 
+
+  run-all:
+    desc: Run all checks
+    cmds:
+      - time ./prowler  -p {{.profile}} -r eu-central-1 |tee output/checkall-cli
+      #- time ./prowler -p ggtrcadmin -r eu-central-1 -c extra758 
+
+  test-all:
+    desc: Run all checks
+    deps: [clean]
+    cmds:
+      - task: enable-aws-cli
+      - cmd: echo "AWS CLI Run"
+        silent: true
+      - cmd: time ./prowler  -p {{.profile}} -r eu-central-1 |tee output/checkall-cli
+        ignore_error: true
+      - task: enable-aws-clip
+      - cmd: echo "clip Run"
+        silent: true
+      - cmd: time ./prowler  -p {{.profile}} -r eu-central-1 |tee output/checkall-clip
+        ignore_error: true
+      - cmd: echo "Diff Test"
+        silent: true
+      - cmd: diff output/* && echo "PASS"
+        silent: true
+
+  check116:
+    # ggtrcadmin
+    # cli
+    # real	0m-29.230s
+    # clip
+    # v0.1.4 real	0m-28.671s
+    desc: check 116
+    deps: [clean]
+    cmds:
+      - task: enable-aws-cli
+      - cmd: echo "AWS CLI Run"
+        silent: true
+      - cmd: time ./prowler -M csv  -p {{.profile}} -r eu-central-1 -c check116  
+        ignore_error: true
+      - task: enable-aws-clip
+      - cmd: echo "clip Run"
+        silent: true
+      - cmd: time ./prowler -M csv -p {{.profile}} -r eu-central-1 -c check116 
+        ignore_error: true
+
+  check762:
+    # ggtrcadmin
+    # cli
+    # 
+    # clip
+    # 
+    desc: check 762 - Lambda functions
+    deps: [clean]
+    cmds:
+      - task: enable-aws-cli
+      - cmd: echo "AWS CLI Run"
+        silent: true
+      - cmd: time ./prowler  -p {{.profile}} -r eu-central-1 -c check762  |tee output/check762-cli
+        ignore_error: true
+      - task: enable-aws-clip
+      - cmd: echo "clip Run"
+        silent: true
+      - cmd: time ./prowler  -p {{.profile}} -r eu-central-1 -c check762 |tee output/check762-clip
+        ignore_error: true
+      - cmd: echo "Diff Test"
+        silent: true
+      - cmd: diff output/* && echo "PASS"
+        silent: true
+
+
+
+  enable-aws-cli:
+    desc: enable-aws-cli
+    cmds:
+      - cmd: /bin/cp templates/awscli_detector_aws include/awscli_detector
+        ignore_error: true
+
+  enable-aws-clip:
+    desc: enable clip
+    cmds:
+      - cmd: cp templates/awscli_detector_awclip include/awscli_detector
+        ignore_error: true

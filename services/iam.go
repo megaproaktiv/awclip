@@ -23,14 +23,13 @@ type IamInterface interface {
 		optFns ...func(*iam.Options)) (*iam.ListUsersOutput, error)
 }
 
-var IamListUserParameter = &cache.Parameters{
-	Service:              aws.String("iam"),
-	Action:               aws.String("list-users"),
-	Output:               aws.String("text"),
-	Region:               aws.String("*"),
-	Profile:              aws.String("*"),
-	AdditionalParameters: map[string]*string{"user-name": &any},
-	Query:                aws.String("Users[*].UserName"),
+var IamListUsersParameter = &cache.Parameters{
+	Service: aws.String("iam"),
+	Action:  aws.String("list-users"),
+	Output:  aws.String("text"),
+	Region:  aws.String("*"),
+	Profile: aws.String("*"),
+	Query:   aws.String("Users[*].UserName"),
 }
 
 var IamListUserPoliciesParameter = &cache.Parameters{
@@ -119,7 +118,6 @@ func IamListUserProxy(entry *cache.CacheEntry, client IamInterface) *string {
 	content = content + NL
 
 	return &content
-
 }
 
 func IamListAttachedUserPoliciesProxy(entry *cache.CacheEntry, client IamInterface) *string {

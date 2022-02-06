@@ -1,7 +1,6 @@
 package services
 
 import (
-	
 	"context"
 	"encoding/json"
 	"io"
@@ -10,7 +9,7 @@ import (
 	"strings"
 
 	"github.com/megaproaktiv/awclip/cache"
-	
+
 	gomiddleware "github.com/aws/aws-sdk-go-v2/aws/middleware"
 	"github.com/aws/aws-sdk-go-v2/service/ec2"
 
@@ -64,7 +63,7 @@ func ApiCallDumpFileNameCtx(ctx context.Context) *string {
 
 func ApiCallDumpFileNameString(serviceId *string, operationName *string, region *string) *string {
 	postfix := ".json"
-	if( strings.ToLower(*serviceId) == "ec2"){
+	if strings.ToLower(*serviceId) == "ec2" {
 		postfix = ".xml"
 	}
 	ops := strings.Replace(*operationName, "-", "", 1)
@@ -107,7 +106,7 @@ var HandleDeserialize = middleware.DeserializeMiddlewareFunc("dumpjson", func(
 	body := io.TeeReader(response.Body, ringBuffer)
 
 	prefetchName := ApiCallDumpFileNameCtx(ctx)
-	
+	log.Println("PrefetchName: ",prefetchName)
 	file, err := os.Create(*prefetchName)
 	if err != nil {
 		log.Fatal(err)
@@ -134,13 +133,13 @@ var HandleFinalize = middleware.FinalizeMiddlewareFunc("dumpjson", func(
 	ec2_DescribeInstancesOutput := response.(*ec2.DescribeInstancesOutput)
 
 	u, err := json.Marshal(ec2_DescribeInstancesOutput)
-        if err != nil {
-            panic(err)
-        }
-	
+	if err != nil {
+		panic(err)
+	}
+
 	prefetchName := ApiCallDumpFileNameCtx(ctx)
-	
-	file, err := os.Create(*prefetchName+".wew")
+
+	file, err := os.Create(*prefetchName + ".wew")
 	if err != nil {
 		log.Fatal(err)
 	}
