@@ -2,8 +2,10 @@ package services
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"log"
+	"os"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/ec2"
@@ -49,12 +51,13 @@ func Ec2DescribeInstancesProxy(llfpm *cache.CacheEntry, cfg aws.Config) {
 	llfpm.Provider = "go"
 	var err error
 
+	var instances *ec2.DescribeInstancesOutput
 	if len(*llfpm.Parameters.Region) > 4 {
-		_, err = client.DescribeInstances(context.TODO(), nil, func(o *ec2.Options) {
+		instances, err = client.DescribeInstances(context.TODO(), nil, func(o *ec2.Options) {
 			o.Region = *llfpm.Parameters.Region
 		})
 	} else {
-		_, err = client.DescribeInstances(context.TODO(), nil)
+		instances, err = client.DescribeInstances(context.TODO(), nil)
 	}
 
 	if err != nil {
@@ -63,6 +66,20 @@ func Ec2DescribeInstancesProxy(llfpm *cache.CacheEntry, cfg aws.Config) {
 		log.Fatal(err)
 	}
 
+	body, err := json.Marshal(instances)
+    if err != nil {
+        fmt.Println(err)
+        return
+    }
+	prefetchName := ApiCallDumpFileNameString(llfpm.Parameters.Service,llfpm.Parameters.Action,llfpm.Parameters.Region)
+	
+	file, err := os.Create(*prefetchName)
+	if err != nil {
+		log.Fatal(err)
+	}
+	file.Write(body)
+
+	defer file.Close()
 }
 
 func Ec2DescribeRegionsProxy(newCacheEntry *cache.CacheEntry, client Ec2Interface) *string {

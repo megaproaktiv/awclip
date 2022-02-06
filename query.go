@@ -36,7 +36,7 @@ func QueryText(input *string, query *string) *string{
 	anArray := result.([]interface{})
 	tools.ParseArray(anArray,keys,&buffer)
 
-	text := buffer.String()
+	text := buffer.String()+NL
 	//fmt.Println("Text: \n",text)
 	return &text
 }
